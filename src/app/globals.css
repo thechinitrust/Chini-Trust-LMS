@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 30% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 30% 14%;
+
+    /* Brand accent #888820 — reserved for primary CTAs, active states, key
+       headings/icons, progress accents & badges. Not used as a fill color. */
+    --primary: 60 62% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Soft blue — the everyday interactive/secondary accent */
+    --secondary: 210 60% 96%;
+    --secondary-foreground: 213 70% 30%;
+
+    --muted: 210 25% 96%;
+    --muted-foreground: 215 16% 46%;
+
+    --accent: 210 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 152 55% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 88%;
+    --ring: 210 70% 55%;
+
+    --radius: 0.75rem;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    --font-dyslexic: "OpenDyslexic", "Comic Sans MS", "Comic Sans", Verdana,
+      sans-serif;
+  }
+
+  .dark {
+    --background: 222 32% 8%;
+    --foreground: 210 30% 94%;
+
+    --card: 222 28% 11%;
+    --card-foreground: 210 30% 94%;
+
+    --popover: 222 28% 11%;
+    --popover-foreground: 210 30% 94%;
+
+    --primary: 60 55% 52%;
+    --primary-foreground: 222 32% 10%;
+
+    --secondary: 213 30% 18%;
+    --secondary-foreground: 210 60% 88%;
+
+    --muted: 217 25% 17%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 210 80% 65%;
+    --accent-foreground: 222 32% 10%;
+
+    --success: 152 45% 46%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 25% 20%;
+    --input: 217 25% 22%;
+    --ring: 210 80% 65%;
+  }
+
+  /* Accessibility: dyslexia-friendly typography mode */
+  .font-dyslexic body,
+  .font-dyslexic {
+    font-family: var(--font-dyslexic);
+    letter-spacing: 0.02em;
+    line-height: 1.7;
+  }
+
+  /* Accessibility: larger base text size mode */
+  .text-scale-lg {
+    font-size: 112.5%;
+  }
+  .text-scale-xl {
+    font-size: 125%;
+  }
+
+  /* Accessibility: focus mode dims non-essential chrome */
+  .focus-mode [data-focus-dim="true"] {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .sr-only-focusable {
+    @apply sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
+  }
+}

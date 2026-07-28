@@ -4,12 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
+import { createClient } from "@/lib/supabase/client";
+import { notify } from "@/lib/toast";
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
+  const supabase = React.useMemo(() => createClient(), []);
   const [email, setEmail] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [sent, setSent] = React.useState(false);
@@ -17,9 +20,14 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // TODO(supabase): call supabase.auth.resetPasswordForEmail(email)
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     setIsSubmitting(false);
+    if (error) {
+      notify.error("Couldn't send reset link", error.message);
+      return;
+    }
     setSent(true);
   };
 

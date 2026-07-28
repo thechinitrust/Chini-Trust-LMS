@@ -3,84 +3,153 @@
 import * as React from "react";
 
 import type { Profile, UserRole } from "@/lib/types";
-import { CURRENT_ADMIN_ID, CURRENT_LEARNER_ID, mockProfiles } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/client";
 
 /**
- * Mock authentication context.
+ * Supabase-backed authentication context. Session state comes from
+ * `supabase.auth` (cookies, refreshed by middleware.ts); `user` is the
+ * matching `profiles` row, kept in sync via `onAuthStateChange`.
  *
- * TODO(supabase): replace this whole provider with one backed by
- * `supabase.auth.onAuthStateChange` + a `profiles` table lookup. Every
- * consumer of `useAuth()` should keep working unchanged — only this file's
- * internals need to change (see docs/supabase-integration.md once written).
- *
- * For now, session state is simulated in memory + localStorage so the app
- * can demonstrate logged-out, learner, and admin states without a backend.
- * "Login" accepts any email/password; an email containing "admin" signs in
- * as the mock admin profile, anything else signs in as the mock learner.
+ * `role` is never trusted from anything the client sets (auth metadata) --
+ * it's whatever the `profiles` row says, which only the database (see
+ * supabase/schemas/10_profiles.sql) is allowed to change.
  */
+
+interface RegisterResult {
+  profile: Profile | null;
+  /** True when signup succeeded but no session was issued yet -- this
+   *  project requires clicking an email confirmation link before login. */
+  needsEmailConfirmation: boolean;
+}
 
 interface AuthContextValue {
   user: Profile | null;
   role: UserRole | null;
   isLoading: boolean;
-  login: (email: string, _password: string) => Promise<Profile>;
-  register: (fullName: string, email: string, _password: string) => Promise<Profile>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<Profile>;
+  register: (fullName: string, email: string, password: string) => Promise<RegisterResult>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
 
-const STORAGE_KEY = "neurobridge.mock-session";
+interface ProfileRow {
+  id: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+function toProfile(row: ProfileRow): Profile {
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    role: row.role,
+    avatarUrl: row.avatar_url ?? undefined,
+    createdAt: row.created_at,
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const supabase = React.useMemo(() => createClient(), []);
   const [user, setUser] = React.useState<Profile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const loadProfile = React.useCallback(
+    async (userId: string): Promise<Profile | null> => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, role, avatar_url, created_at")
+        .eq("id", userId)
+        .single();
+
+      if (error || !data) {
+        setUser(null);
+        return null;
+      }
+
+      const profile = toProfile(data);
+      setUser(profile);
+      return profile;
+    },
+    [supabase]
+  );
+
   React.useEffect(() => {
-    const storedId = window.localStorage.getItem(STORAGE_KEY);
-    if (storedId) {
-      const found = mockProfiles.find((p) => p.id === storedId);
-      if (found) setUser(found);
-    }
-    setIsLoading(false);
-  }, []);
+    let isMounted = true;
 
-  const persist = (profile: Profile | null) => {
-    if (profile) {
-      window.localStorage.setItem(STORAGE_KEY, profile.id);
-    } else {
-      window.localStorage.removeItem(STORAGE_KEY);
-    }
-  };
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        void loadProfile(session.user.id).finally(() => isMounted && setIsLoading(false));
+      } else {
+        setIsLoading(false);
+      }
+    });
 
-  const login = React.useCallback(async (email: string, _password: string) => {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const profile = email.toLowerCase().includes("admin")
-      ? mockProfiles.find((p) => p.id === CURRENT_ADMIN_ID)!
-      : mockProfiles.find((p) => p.id === CURRENT_LEARNER_ID)!;
-    setUser(profile);
-    persist(profile);
-    return profile;
-  }, []);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        void loadProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
+    });
 
-  const register = React.useCallback(async (fullName: string, email: string, _password: string) => {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const profile: Profile = {
-      id: CURRENT_LEARNER_ID,
-      fullName: fullName || "New Learner",
-      email,
-      role: "learner",
-      createdAt: new Date().toISOString(),
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
     };
-    setUser(profile);
-    persist(profile);
-    return profile;
-  }, []);
+  }, [supabase, loadProfile]);
 
-  const logout = React.useCallback(() => {
+  const login = React.useCallback(
+    async (email: string, password: string) => {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error || !data.user) {
+        throw new Error(error?.message ?? "Login failed.");
+      }
+      const profile = await loadProfile(data.user.id);
+      if (!profile) {
+        throw new Error("Signed in, but no profile was found for this account.");
+      }
+      return profile;
+    },
+    [supabase, loadProfile]
+  );
+
+  const register = React.useCallback(
+    async (fullName: string, email: string, password: string): Promise<RegisterResult> => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (!data.user) {
+        throw new Error("Registration failed.");
+      }
+      if (!data.session) {
+        // Email confirmation is required before a session is issued -- the
+        // profiles row already exists (created by the on-signup trigger),
+        // but we can't read it as this unauthenticated client yet.
+        return { profile: null, needsEmailConfirmation: true };
+      }
+      const profile = await loadProfile(data.user.id);
+      return { profile, needsEmailConfirmation: false };
+    },
+    [supabase, loadProfile]
+  );
+
+  const logout = React.useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    persist(null);
-  }, []);
+  }, [supabase]);
 
   const value: AuthContextValue = {
     user,

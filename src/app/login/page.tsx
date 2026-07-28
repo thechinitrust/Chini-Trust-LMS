@@ -26,6 +26,8 @@ export default function LoginPage() {
       const profile = await login(email, password);
       notify.success(`Welcome back, ${profile.fullName.split(" ")[0]}`);
       router.push(profile.role === "admin" ? "/admin" : "/dashboard");
+    } catch (error) {
+      notify.error("Couldn't log in", error instanceof Error ? error.message : undefined);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,10 +81,6 @@ export default function LoginPage() {
           {isSubmitting && <Loader2 className="size-4 animate-spin" />}
           Log in
         </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          Demo mode: any password works. Use an email containing &ldquo;admin&rdquo; to preview the
-          admin dashboard.
-        </p>
       </form>
     </AuthCard>
   );

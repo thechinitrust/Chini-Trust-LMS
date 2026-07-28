@@ -16,6 +16,13 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
 
 const TYPES: ResourceType[] = ["pdf", "slides", "worksheet", "guide", "link"];
+const TYPE_LABEL: Record<ResourceType, string> = {
+  pdf: "PDF",
+  slides: "Slides",
+  worksheet: "Worksheet",
+  guide: "Guide",
+  link: "Link",
+};
 const AUDIENCES: AudienceTag[] = ["parents", "teachers", "students", "employers", "neurodivergent-individuals"];
 
 function emptyResource(): Resource {
@@ -88,8 +95,8 @@ export default function AdminResourcesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Resources</h1>
-          <p className="mt-1 text-muted-foreground">Manage downloadable guides and toolkits.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Resources</h1>
+          <p className="mt-2 text-muted-foreground">Manage downloadable guides and toolkits.</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" aria-hidden="true" />
@@ -134,8 +141,8 @@ export default function AdminResourcesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {TYPES.map((t) => (
-                    <SelectItem key={t} value={t} className="capitalize">
-                      {t}
+                    <SelectItem key={t} value={t}>
+                      {TYPE_LABEL[t]}
                     </SelectItem>
                   ))}
                 </SelectContent>

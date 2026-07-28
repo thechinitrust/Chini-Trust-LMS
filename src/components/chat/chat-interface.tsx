@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Brain } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import type { ChatMessage } from "@/lib/types";
 import { EXAMPLE_PROMPTS, getMockAIResponse } from "@/lib/mock-ai";
@@ -69,40 +70,49 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-[min(70vh,700px)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
-      <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-5 py-4">
-        <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Sparkles className="size-4" aria-hidden="true" />
+    <div className="flex h-[min(72vh,720px)] flex-col overflow-hidden rounded-3xl border border-black/5 bg-card shadow-soft-lg dark:border-white/10">
+      <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-6 py-5">
+        <span className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Brain className="size-4" strokeWidth={1.5} aria-hidden="true" />
         </span>
         <div>
-          <p className="text-sm font-semibold text-foreground">AI NeuroGuide</p>
+          <p className="text-sm font-semibold text-foreground">NeuroGuide</p>
           <p className="text-xs text-muted-foreground">Supportive guidance, available anytime</p>
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-        {messages.map((message) => (
-          <ChatBubble key={message.id} message={message} />
-        ))}
+      <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+        <AnimatePresence initial={false}>
+          {messages.map((message) => (
+            <motion.div
+              key={message.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ChatBubble message={message} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
         {isTyping && (
-          <div className="flex items-start gap-3">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-3">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Sparkles className="size-4" aria-hidden="true" />
+              <Brain className="size-4" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <TypingIndicator />
-          </div>
+          </motion.div>
         )}
         <div ref={scrollRef} />
       </div>
 
       {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-2 border-t border-border px-5 py-3">
+        <div className="flex flex-wrap gap-2 border-t border-border px-6 py-4">
           {EXAMPLE_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               type="button"
               onClick={() => sendMessage(prompt)}
-              className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary-text"
             >
               {prompt}
             </button>
@@ -111,7 +121,7 @@ export function ChatInterface() {
       )}
 
       <form
-        className="flex items-end gap-2 border-t border-border p-4"
+        className="flex items-end gap-2 border-t border-border p-5"
         onSubmit={(e) => {
           e.preventDefault();
           sendMessage(input);
@@ -127,12 +137,12 @@ export function ChatInterface() {
             }
           }}
           placeholder="Ask NeuroGuide a question..."
-          className="min-h-11 flex-1 resize-none"
+          className="min-h-12 flex-1 resize-none rounded-2xl"
           rows={1}
           aria-label="Message"
         />
         <Button type="submit" size="icon" disabled={!input.trim() || isTyping} aria-label="Send message">
-          <Send className="size-4" />
+          <Send className="size-4" strokeWidth={1.5} />
         </Button>
       </form>
     </div>

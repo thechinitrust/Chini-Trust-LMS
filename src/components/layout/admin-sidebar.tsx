@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
@@ -30,8 +31,8 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-border bg-muted/30 lg:block">
-      <nav className="sticky top-16 flex flex-col gap-1 p-4" aria-label="Admin navigation">
+    <aside className="hidden w-64 shrink-0 border-r border-black/5 lg:block dark:border-white/10">
+      <nav className="sticky top-20 flex flex-col gap-1 p-6" aria-label="Admin navigation">
         {ADMIN_LINKS.map(({ href, label, icon: Icon, exact }) => {
           const active = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
           return (
@@ -39,13 +40,20 @@ export function AdminSidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                active && "bg-primary/10 text-primary"
+                "relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                active && "text-primary-text"
               )}
               aria-current={active ? "page" : undefined}
             >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
+              {active && (
+                <motion.span
+                  layoutId="admin-active-pill"
+                  className="absolute inset-0 rounded-xl bg-primary/10"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <Icon className="relative z-10 size-4" strokeWidth={1.5} aria-hidden="true" />
+              <span className="relative z-10">{label}</span>
             </Link>
           );
         })}
@@ -57,10 +65,7 @@ export function AdminSidebar() {
 export function AdminMobileNav() {
   const pathname = usePathname();
   return (
-    <nav
-      className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-2 lg:hidden"
-      aria-label="Admin navigation"
-    >
+    <nav className="-mx-6 mb-8 flex gap-2 overflow-x-auto px-6 pb-2 lg:hidden" aria-label="Admin navigation">
       {ADMIN_LINKS.map(({ href, label, exact }) => {
         const active = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
         return (
@@ -68,8 +73,8 @@ export function AdminMobileNav() {
             key={href}
             href={href}
             className={cn(
-              "shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground",
-              active && "border-primary bg-primary/10 text-primary"
+              "shrink-0 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground",
+              active && "border-primary/30 bg-primary/10 text-primary-text"
             )}
           >
             {label}

@@ -5,17 +5,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Moon, Sun, LayoutDashboard, ShieldCheck, LogOut, Brain } from "lucide-react";
 import { useTheme } from "next-themes";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,18 +24,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const NAV_LINKS = [
   { href: "/learn", label: "Learn" },
   { href: "/resources", label: "Resources" },
-  { href: "/ai-neuroguide", label: "AI NeuroGuide" },
+  { href: "/ai-neuroguide", label: "NeuroGuide" },
   { href: "/accessibility", label: "Accessibility" },
   { href: "/about", label: "About" },
 ];
 
 function initials(name: string) {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
 export function Navbar() {
@@ -55,25 +45,24 @@ export function Navbar() {
 
   const handleLogout = () => {
     logout();
+    setMobileOpen(false);
     router.push("/");
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <a href="#main-content" className="sr-only-focusable">
-        Skip to content
-      </a>
-      <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-foreground">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Brain className="size-5" aria-hidden="true" />
+    <header
+      className="sticky top-0 z-40 glass"
+      data-focus-hide="true"
+    >
+      <div className="container-page flex h-20 items-center justify-between gap-4 px-6 lg:px-12">
+        <Link href="/" className="group flex shrink-0 items-center gap-2.5">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-ink text-primary-foreground shadow-soft transition-transform duration-500 group-hover:scale-105">
+            <Brain className="size-5" strokeWidth={1.5} aria-hidden="true" />
           </span>
-          <span className="text-lg tracking-tight">
-            NeuroBridge <span className="text-primary">AI</span>
-          </span>
+          <span className="font-serif text-xl tracking-tight text-foreground">NeuroBridge</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+        <nav className="relative hidden items-center gap-1 lg:flex" aria-label="Main navigation">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href || pathname.startsWith(link.href + "/");
             return (
@@ -81,12 +70,19 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                  active && "bg-secondary text-primary"
+                  "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                  active && "text-primary-text"
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                {link.label}
+                {active && (
+                  <motion.span
+                    layoutId="navbar-active-pill"
+                    className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
               </Link>
             );
           })}
@@ -99,14 +95,29 @@ export function Navbar() {
             aria-label="Toggle dark mode"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            {mounted && theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={mounted && theme === "dark" ? "sun" : "moon"}
+                initial={{ opacity: 0, rotate: -60, scale: 0.6 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 60, scale: 0.6 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="flex"
+              >
+                {mounted && theme === "dark" ? (
+                  <Sun className="size-5" strokeWidth={1.5} />
+                ) : (
+                  <Moon className="size-5" strokeWidth={1.5} />
+                )}
+              </motion.span>
+            </AnimatePresence>
           </Button>
 
           <div className="hidden items-center gap-2 sm:flex">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2 px-2">
+                  <Button variant="ghost" className="gap-2 pr-2 pl-2">
                     <Avatar className="size-7">
                       <AvatarFallback className="text-xs">{initials(user.fullName)}</AvatarFallback>
                     </Avatar>
@@ -114,23 +125,23 @@ export function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="font-normal text-muted-foreground">{user.email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="flex items-center gap-2">
-                      <LayoutDashboard className="size-4" /> Dashboard
+                      <LayoutDashboard className="size-4" strokeWidth={1.5} /> Dashboard
                     </Link>
                   </DropdownMenuItem>
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin" className="flex items-center gap-2">
-                        <ShieldCheck className="size-4" /> Admin panel
+                        <ShieldCheck className="size-4" strokeWidth={1.5} /> Admin panel
                       </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={handleLogout} className="flex items-center gap-2 text-destructive">
-                    <LogOut className="size-4" /> Log out
+                  <DropdownMenuItem onSelect={handleLogout} className="flex items-center gap-2 text-destructive focus:text-destructive">
+                    <LogOut className="size-4" strokeWidth={1.5} /> Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -149,31 +160,38 @@ export function Navbar() {
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
-                <Menu className="size-5" />
+                <Menu className="size-5" strokeWidth={1.5} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="right" className="w-full max-w-xs">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle className="font-serif">Menu</SheetTitle>
               </SheetHeader>
               <nav className="mt-4 flex flex-col gap-1" aria-label="Mobile navigation">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {NAV_LINKS.map((link) => {
+                  const active = pathname === link.href || pathname.startsWith(link.href + "/");
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                        active ? "bg-primary/12 text-primary-text" : "text-foreground"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
                 <div className="my-2 h-px bg-border" />
                 {user ? (
                   <>
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                      className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
                     >
                       Dashboard
                     </Link>
@@ -181,17 +199,14 @@ export function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                        className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
                       >
                         Admin panel
                       </Link>
                     )}
                     <button
-                      onClick={() => {
-                        setMobileOpen(false);
-                        handleLogout();
-                      }}
-                      className="rounded-md px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
+                      onClick={handleLogout}
+                      className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
                     >
                       Log out
                     </button>
@@ -201,14 +216,14 @@ export function Navbar() {
                     <Link
                       href="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                      className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
                     >
                       Log in
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground"
+                      className="rounded-full bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
                     >
                       Sign up
                     </Link>

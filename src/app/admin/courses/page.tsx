@@ -18,6 +18,13 @@ import { FormField } from "@/components/admin/form-field";
 
 const CATEGORIES: LearningCategory[] = ["autism", "adhd", "dyslexia", "workplace"];
 
+const CATEGORY_LABEL: Record<LearningCategory, string> = {
+  autism: "Autism",
+  adhd: "ADHD",
+  dyslexia: "Dyslexia",
+  workplace: "Workplace Inclusion",
+};
+
 function slugify(title: string) {
   return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
@@ -83,7 +90,7 @@ export default function AdminCoursesPage() {
 
   const columns: AdminTableColumn<Course>[] = [
     { header: "Title", cell: (c) => <span className="font-medium text-foreground">{c.title}</span> },
-    { header: "Category", cell: (c) => <span className="capitalize">{c.category}</span> },
+    { header: "Category", cell: (c) => <span>{CATEGORY_LABEL[c.category]}</span> },
     { header: "Level", cell: (c) => <span className="capitalize">{c.level}</span> },
     { header: "Modules", cell: (c) => c.moduleIds.length },
     {
@@ -113,8 +120,8 @@ export default function AdminCoursesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Courses</h1>
-          <p className="mt-1 text-muted-foreground">Create and manage the course catalogue.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Courses</h1>
+          <p className="mt-2 text-muted-foreground">Create and manage the course catalogue.</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" aria-hidden="true" />
@@ -177,8 +184,8 @@ export default function AdminCoursesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat} className="capitalize">
-                      {cat}
+                    <SelectItem key={cat} value={cat}>
+                      {CATEGORY_LABEL[cat]}
                     </SelectItem>
                   ))}
                 </SelectContent>

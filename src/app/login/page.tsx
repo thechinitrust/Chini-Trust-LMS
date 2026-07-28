@@ -38,7 +38,7 @@ export default function LoginPage() {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold text-primary hover:underline">
+          <Link href="/register" className="font-semibold text-primary-text hover:underline">
             Sign up
           </Link>
         </>
@@ -60,7 +60,7 @@ export default function LoginPage() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+            <Link href="/forgot-password" className="text-xs font-medium text-primary-text hover:underline">
               Forgot password?
             </Link>
           </div>

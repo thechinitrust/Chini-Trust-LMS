@@ -21,26 +21,24 @@ export function LessonCard({ lesson, completed, active }: LessonCardProps) {
     <Link
       href={`/lessons/${lesson.id}`}
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-colors hover:bg-muted",
-        active && "border-primary/30 bg-primary/5"
+        "flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:bg-muted",
+        active && "border-primary/20 bg-primary/5"
       )}
       aria-current={active ? "true" : undefined}
     >
       {completed ? (
-        <CheckCircle2 className="size-5 shrink-0 text-success" aria-hidden="true" />
+        <CheckCircle2 className="size-5 shrink-0 text-success" strokeWidth={1.5} aria-hidden="true" />
       ) : active ? (
-        <PlayCircle className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        <PlayCircle className="size-5 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
       ) : (
-        <Circle className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <Circle className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
       )}
       <span className="min-w-0 flex-1">
-        <span className={cn("block truncate text-sm font-medium", active ? "text-primary" : "text-foreground")}>
+        <span className={cn("block truncate text-sm font-medium", active ? "text-primary-text" : "text-foreground")}>
           {lesson.title}
         </span>
       </span>
-      <span className="shrink-0 text-xs text-muted-foreground">
-        {formatDuration(lesson.video.durationSeconds)}
-      </span>
+      <span className="shrink-0 text-xs text-muted-foreground">{formatDuration(lesson.video.durationSeconds)}</span>
     </Link>
   );
 }

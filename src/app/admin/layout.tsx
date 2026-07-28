@@ -9,7 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex">
         <AdminSidebar />
         <div className="min-w-0 flex-1">
-          <div className="container-page py-8 lg:py-10">
+          <div className="px-6 py-10 lg:px-12 lg:py-14">
             <AdminMobileNav />
             {children}
           </div>

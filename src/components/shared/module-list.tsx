@@ -10,12 +10,10 @@ interface ModuleListProps {
 
 export function ModuleList({ modules, lessonsByModule, completedLessonIds, activeLessonId }: ModuleListProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {modules.map((module, idx) => (
         <div key={module.id}>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Module {idx + 1}
-          </p>
+          <p className="mb-1 text-xs font-medium tracking-widest text-primary-text uppercase">Module {idx + 1}</p>
           <h3 className="mb-2 font-semibold text-foreground">{module.title}</h3>
           <div className="space-y-0.5">
             {(lessonsByModule[module.id] ?? []).map((lesson) => (

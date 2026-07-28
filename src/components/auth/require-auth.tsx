@@ -36,10 +36,10 @@ export function RequireAuth({
 
   if (isLoading || !user || (adminOnly && user.role !== "admin")) {
     return (
-      <div className="container-page space-y-4 py-12">
-        <Skeleton className="h-8 w-64" />
+      <div className="container-page space-y-4 px-6 py-16 lg:px-12">
+        <Skeleton className="h-9 w-64" />
         <Skeleton className="h-4 w-full max-w-md" />
-        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-56 w-full" />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 /**
- * Domain types for NeuroBridge AI.
+ * Domain types for NeuroBridge.
  *
  * Shaped to map 1:1 onto the future Supabase/Postgres schema (see
  * docs/supabase-schema.md once Supabase is wired in). Every entity here is
@@ -39,6 +39,11 @@ export interface Course {
   published: boolean;
   moduleIds: string[];
   createdAt: string;
+  /**
+   * Optional course-level intro/trailer video shown at the top of the course
+   * page. When unset the course page falls back to the first lesson's video.
+   */
+  previewVideoId?: string;
 }
 
 export interface Module {
@@ -69,6 +74,8 @@ export interface Lesson {
   published: boolean;
   video: YoutubeVideoMeta;
   resourceIds: string[];
+  /** What the learner should be able to do after this specific lesson. */
+  objectives?: string[];
 }
 
 export type ResourceType = "pdf" | "slides" | "worksheet" | "guide" | "link";
@@ -169,4 +176,16 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   createdAt: string;
+}
+
+/**
+ * Placeholder team profile shown on the About page. Swap `name`, `role`,
+ * `bio` and `photoUrl` for real staff details when they're available.
+ */
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  photoUrl: string;
 }

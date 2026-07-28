@@ -19,7 +19,7 @@ interface YouTubeEmbedPlayerProps {
  */
 export function YouTubeEmbedPlayer({ youtubeVideoId, title }: YouTubeEmbedPlayerProps) {
   return (
-    <div className="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-sm">
+    <div className="aspect-video w-full overflow-hidden rounded-2xl border border-black/5 bg-black shadow-soft-lg dark:border-white/10">
       <iframe
         className="size-full"
         src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?rel=0&modestbranding=1`}

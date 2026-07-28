@@ -25,7 +25,7 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(fullName, email, password);
-      notify.success("Account created", "Welcome to NeuroBridge AI.");
+      notify.success("Account created", "Welcome to NeuroBridge.");
       router.push("/dashboard");
     } finally {
       setIsSubmitting(false);
@@ -35,11 +35,11 @@ export default function RegisterPage() {
   return (
     <AuthCard
       title="Create your account"
-      description="Join NeuroBridge AI to track progress and earn certificates."
+      description="Join NeuroBridge to track progress and earn certificates."
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary hover:underline">
+          <Link href="/login" className="font-semibold text-primary-text hover:underline">
             Log in
           </Link>
         </>

@@ -6,16 +6,11 @@ import { ArrowRight, FileText, ListChecks } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
 import { useLocalProgress } from "@/hooks/use-local-progress";
-import {
-  getCourseById,
-  getModuleById,
-  getLessonsForModule,
-  getQuizForModule,
-  mockResources,
-} from "@/lib/mock-data";
+import { getCourseById, getModuleById, getLessonsForModule, getQuizForModule, mockResources } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonCard } from "@/components/shared/lesson-card";
+import { Reveal } from "@/components/motion/reveal";
 
 export default function ModulePage() {
   const params = useParams<{ courseId: string; moduleId: string }>();
@@ -31,59 +26,57 @@ export default function ModulePage() {
   const resources = mockResources.filter((r) => lessons.some((l) => l.resourceIds.includes(r.id)));
 
   return (
-    <div className="container-page py-12">
-      <nav className="text-sm text-muted-foreground">
-        <Link href={`/courses/${course.id}`} className="hover:text-primary">
-          {course.title}
-        </Link>
-      </nav>
+    <div className="container-page px-6 py-16 lg:px-12" data-focus-content="true">
+      <Reveal>
+        <nav className="text-sm text-muted-foreground">
+          <Link href={`/courses/${course.id}`} className="hover:text-primary-text">
+            {course.title}
+          </Link>
+        </nav>
 
-      <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{courseModule.title}</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">{courseModule.description}</p>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="font-serif text-3xl tracking-tight text-foreground sm:text-4xl">{courseModule.title}</h1>
+            <p className="mt-3 max-w-2xl text-muted-foreground">{courseModule.description}</p>
+          </div>
+          <Badge variant="outline">{lessons.length} lessons</Badge>
         </div>
-        <Badge variant="outline">{lessons.length} lessons</Badge>
-      </div>
+      </Reveal>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-1">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]" data-focus-grid="true">
+        <Reveal delay={0.1} className="space-y-1">
           {lessons.map((lesson) => (
             <LessonCard key={lesson.id} lesson={lesson} completed={progress.isLessonCompleted(lesson.id)} />
           ))}
-        </div>
+        </Reveal>
 
-        <div className="space-y-6">
+        <Reveal delay={0.2} className="space-y-6" data-focus-aside="true">
           {quiz && (
-            <div className="rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2">
-                <ListChecks className="size-5 text-primary" aria-hidden="true" />
+            <div className="rounded-2xl border border-black/5 bg-card p-6 shadow-soft dark:border-white/10">
+              <div className="flex items-center gap-2.5">
+                <ListChecks className="size-5 text-primary" strokeWidth={1.5} aria-hidden="true" />
                 <h2 className="font-semibold text-foreground">Module quiz</h2>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">{quiz.description}</p>
-              <Button className="mt-4 w-full" asChild>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{quiz.description}</p>
+              <Button className="mt-5 w-full" asChild>
                 <Link href={`/quizzes/${quiz.id}`}>
                   Take the quiz
-                  <ArrowRight className="size-4" aria-hidden="true" />
+                  <ArrowRight className="size-4" strokeWidth={1.5} aria-hidden="true" />
                 </Link>
               </Button>
             </div>
           )}
 
           {resources.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2">
-                <FileText className="size-5 text-primary" aria-hidden="true" />
+            <div className="rounded-2xl border border-black/5 bg-card p-6 shadow-soft dark:border-white/10">
+              <div className="flex items-center gap-2.5">
+                <FileText className="size-5 text-primary" strokeWidth={1.5} aria-hidden="true" />
                 <h2 className="font-semibold text-foreground">Related resources</h2>
               </div>
               <ul className="mt-3 space-y-2">
                 {resources.map((resource) => (
                   <li key={resource.id}>
-                    <a
-                      href={resource.fileUrl}
-                      download
-                      className="text-sm font-medium text-primary hover:underline"
-                    >
+                    <a href={resource.fileUrl} download className="text-sm font-medium text-primary-text hover:underline">
                       {resource.title}
                     </a>
                   </li>
@@ -91,7 +84,7 @@ export default function ModulePage() {
               </ul>
             </div>
           )}
-        </div>
+        </Reveal>
       </div>
     </div>
   );

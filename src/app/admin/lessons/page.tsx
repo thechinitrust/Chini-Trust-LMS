@@ -120,8 +120,8 @@ export default function AdminLessonsPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Lessons & Videos</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Lessons &amp; Videos</h1>
+          <p className="mt-2 text-muted-foreground">
             Videos live on YouTube — paste a video ID or URL below. No files are uploaded or stored here.
           </p>
         </div>

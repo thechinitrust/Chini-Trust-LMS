@@ -85,8 +85,8 @@ export default function AdminModulesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Modules</h1>
-          <p className="mt-1 text-muted-foreground">Group lessons into modules within each course.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Modules</h1>
+          <p className="mt-2 text-muted-foreground">Group lessons into modules within each course.</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" aria-hidden="true" />

@@ -20,3 +20,9 @@ next-env.d.ts
 
 # typescript
 *.tsbuildinfo
+
+# claude
+/.claude/
+
+# supabase
+/supabase/.temp/

@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Users</h1>
-          <p className="mt-1 text-muted-foreground">Manage learner and admin accounts.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Users</h1>
+          <p className="mt-2 text-muted-foreground">Manage learner and admin accounts.</p>
         </div>
         <Button onClick={openInvite}>
           <Plus className="size-4" aria-hidden="true" />

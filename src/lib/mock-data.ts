@@ -10,6 +10,7 @@ import type {
   QuizAttempt,
   QuizQuestion,
   Resource,
+  TeamMember,
 } from "@/lib/types";
 
 /**
@@ -20,8 +21,10 @@ import type {
  */
 
 // A single verified, safely-embeddable placeholder (Blender Foundation's
-// Creative-Commons-licensed "Big Buck Bunny"). Replace with real
-// youtubeVideoId values once the content team publishes lesson videos.
+// Creative-Commons-licensed "Big Buck Bunny"). Every lesson carries its own
+// `video.youtubeVideoId`, so the content team only has to swap these values
+// per lesson — the player, course page and lesson page already read from
+// each lesson individually.
 const PLACEHOLDER_YT_ID = "aqz-KE-bpKQ";
 
 export const CURRENT_LEARNER_ID = "profile-jamie";
@@ -90,6 +93,7 @@ export const mockCourses: Course[] = [
     published: true,
     moduleIds: ["mod-autism-1", "mod-autism-2"],
     createdAt: "2026-01-10T09:00:00.000Z",
+    previewVideoId: PLACEHOLDER_YT_ID,
   },
   {
     id: "course-adhd",
@@ -113,6 +117,7 @@ export const mockCourses: Course[] = [
     published: true,
     moduleIds: ["mod-adhd-1", "mod-adhd-2"],
     createdAt: "2026-01-18T09:00:00.000Z",
+    previewVideoId: PLACEHOLDER_YT_ID,
   },
   {
     id: "course-dyslexia",
@@ -136,6 +141,7 @@ export const mockCourses: Course[] = [
     published: true,
     moduleIds: ["mod-dyslexia-1", "mod-dyslexia-2"],
     createdAt: "2026-02-02T09:00:00.000Z",
+    previewVideoId: PLACEHOLDER_YT_ID,
   },
   {
     id: "course-workplace",
@@ -159,6 +165,43 @@ export const mockCourses: Course[] = [
     published: true,
     moduleIds: ["mod-workplace-1"],
     createdAt: "2026-02-20T09:00:00.000Z",
+    previewVideoId: PLACEHOLDER_YT_ID,
+  },
+];
+
+/**
+ * Placeholder team roster for the About page. Photos are Unsplash portraits
+ * standing in for real staff headshots — swap these records wholesale once
+ * the trust supplies real names, roles and photography.
+ */
+export const mockTeam: TeamMember[] = [
+  {
+    id: "team-1",
+    name: "Dr. Amara Osei",
+    role: "Director of Learning",
+    bio: "Educational psychologist who designs the course curriculum and keeps it anchored to current evidence.",
+    photoUrl: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400&h=400&fit=crop&q=80",
+  },
+  {
+    id: "team-2",
+    name: "Ravi Menon",
+    role: "Accessibility Lead",
+    bio: "Works with neurodivergent testers to make sure every screen is usable before it ships.",
+    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80",
+  },
+  {
+    id: "team-3",
+    name: "Sofia Lindqvist",
+    role: "Head of Content",
+    bio: "Turns long-form research into plain-language lessons and downloadable classroom tools.",
+    photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&q=80",
+  },
+  {
+    id: "team-4",
+    name: "Daniel Whitfield",
+    role: "Community & Partnerships",
+    bio: "Connects schools, families and employers to the support that actually fits their situation.",
+    photoUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&q=80",
   },
 ];
 
@@ -225,14 +268,23 @@ export const mockModules: Module[] = [
   },
 ];
 
-function lesson(partial: Omit<Lesson, "video" | "resourceIds"> & { resourceIds?: string[] }): Lesson {
+function lesson(
+  partial: Omit<Lesson, "video" | "resourceIds"> & {
+    resourceIds?: string[];
+    /** Per-lesson override; defaults to the shared placeholder. */
+    youtubeVideoId?: string;
+    durationSeconds?: number;
+  }
+): Lesson {
+  const { youtubeVideoId, durationSeconds, ...rest } = partial;
+  const videoId = youtubeVideoId ?? PLACEHOLDER_YT_ID;
   return {
-    ...partial,
+    ...rest,
     resourceIds: partial.resourceIds ?? [],
     video: {
-      youtubeVideoId: PLACEHOLDER_YT_ID,
-      thumbnailUrl: `https://img.youtube.com/vi/${PLACEHOLDER_YT_ID}/hqdefault.jpg`,
-      durationSeconds: 11 * 60 + 42,
+      youtubeVideoId: videoId,
+      thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      durationSeconds: durationSeconds ?? 11 * 60 + 42,
     },
   };
 }
@@ -247,7 +299,13 @@ export const mockLessons: Lesson[] = [
     notes: "Key idea: 'spectrum' describes variation across traits, not a line from mild to severe.",
     order: 1,
     published: true,
+    durationSeconds: 14 * 60 + 20,
     resourceIds: ["resource-understanding-autism"],
+    objectives: [
+      "Define autism as variation across multiple traits",
+      "Explain why 'high' and 'low functioning' labels mislead",
+      "Describe how presentation changes with context and age",
+    ],
   }),
   lesson({
     id: "lesson-autism-1-2",
@@ -257,6 +315,11 @@ export const mockLessons: Lesson[] = [
     description: "Separating outdated stereotypes from current understanding.",
     order: 2,
     published: true,
+    durationSeconds: 9 * 60 + 45,
+    objectives: [
+      "Identify three widespread myths and the evidence against them",
+      "Recognise how masking hides support needs",
+    ],
   }),
   lesson({
     id: "lesson-autism-2-1",
@@ -266,6 +329,13 @@ export const mockLessons: Lesson[] = [
     description: "Lighting, sound, and layout changes that make a real difference.",
     order: 1,
     published: true,
+    durationSeconds: 12 * 60 + 10,
+    resourceIds: ["resource-sensory-room-checklist"],
+    objectives: [
+      "Audit a room for sensory load in under ten minutes",
+      "Apply low-cost lighting and acoustic adjustments",
+      "Offer regulation-friendly seating and break options",
+    ],
   }),
   lesson({
     id: "lesson-autism-2-2",
@@ -275,6 +345,12 @@ export const mockLessons: Lesson[] = [
     description: "Direct language, processing time, and alternative communication supports.",
     order: 2,
     published: true,
+    durationSeconds: 10 * 60 + 30,
+    objectives: [
+      "Use literal, unambiguous phrasing for instructions",
+      "Build in processing time before expecting a response",
+      "Support AAC and non-speaking communication respectfully",
+    ],
   }),
   lesson({
     id: "lesson-adhd-1-1",
@@ -284,6 +360,11 @@ export const mockLessons: Lesson[] = [
     description: "Why 'just focus' misunderstands how ADHD attention actually works.",
     order: 1,
     published: true,
+    durationSeconds: 11 * 60 + 15,
+    objectives: [
+      "Describe attention as regulation rather than capacity",
+      "Explain hyperfocus and why it coexists with distractibility",
+    ],
   }),
   lesson({
     id: "lesson-adhd-1-2",
@@ -293,6 +374,13 @@ export const mockLessons: Lesson[] = [
     description: "Planning, working memory, and time-blindness explained simply.",
     order: 2,
     published: true,
+    durationSeconds: 13 * 60 + 5,
+    resourceIds: ["resource-executive-function-slides"],
+    objectives: [
+      "Name the core executive functions and how they interact",
+      "Connect working-memory load to everyday task breakdown",
+      "Explain time-blindness without framing it as carelessness",
+    ],
   }),
   lesson({
     id: "lesson-adhd-2-1",
@@ -302,7 +390,13 @@ export const mockLessons: Lesson[] = [
     description: "External structure beats willpower — here's how to build it.",
     order: 1,
     published: true,
+    durationSeconds: 10 * 60 + 50,
     resourceIds: ["resource-adhd-classroom-strategies"],
+    objectives: [
+      "Externalise working memory with visible cues and checklists",
+      "Design routines that survive a bad day",
+      "Use body-doubling and timers without shame framing",
+    ],
   }),
   lesson({
     id: "lesson-adhd-2-2",
@@ -312,6 +406,11 @@ export const mockLessons: Lesson[] = [
     description: "Low-cost, high-impact accommodations you can request or offer today.",
     order: 2,
     published: true,
+    durationSeconds: 12 * 60 + 40,
+    objectives: [
+      "Match common friction points to specific accommodations",
+      "Frame an accommodation request constructively",
+    ],
   }),
   lesson({
     id: "lesson-dyslexia-1-1",
@@ -321,6 +420,11 @@ export const mockLessons: Lesson[] = [
     description: "The phonological foundation of reading and where dyslexia intervenes.",
     order: 1,
     published: true,
+    durationSeconds: 13 * 60 + 30,
+    objectives: [
+      "Trace the path from phonemic awareness to fluent reading",
+      "Locate where dyslexia creates friction in that path",
+    ],
   }),
   lesson({
     id: "lesson-dyslexia-1-2",
@@ -330,6 +434,12 @@ export const mockLessons: Lesson[] = [
     description: "What to look for in early years, primary, and secondary learners.",
     order: 2,
     published: true,
+    durationSeconds: 11 * 60,
+    objectives: [
+      "Recognise age-appropriate warning signs",
+      "Distinguish dyslexia from a broader reading delay",
+      "Know when and how to escalate for assessment",
+    ],
   }),
   lesson({
     id: "lesson-dyslexia-2-1",
@@ -339,7 +449,13 @@ export const mockLessons: Lesson[] = [
     description: "The approach behind most effective dyslexia interventions.",
     order: 1,
     published: true,
+    durationSeconds: 15 * 60 + 20,
     resourceIds: ["resource-parent-toolkit"],
+    objectives: [
+      "Explain what makes instruction explicit and systematic",
+      "Apply dyslexia-friendly formatting to your own materials",
+      "Build a confidence-first support plan with a learner",
+    ],
   }),
   lesson({
     id: "lesson-workplace-1-1",
@@ -349,7 +465,13 @@ export const mockLessons: Lesson[] = [
     description: "Finding and removing unintentional barriers in job ads and interviews.",
     order: 1,
     published: true,
+    durationSeconds: 12 * 60 + 55,
     resourceIds: ["resource-inclusive-workplace-guide"],
+    objectives: [
+      "Rewrite a job ad to remove unnecessary requirements",
+      "Share interview questions in advance without losing rigour",
+      "Offer alternative assessment formats",
+    ],
   }),
   lesson({
     id: "lesson-workplace-1-2",
@@ -359,6 +481,12 @@ export const mockLessons: Lesson[] = [
     description: "Structured onboarding as an accommodation that helps everyone.",
     order: 2,
     published: true,
+    durationSeconds: 9 * 60 + 35,
+    resourceIds: ["resource-accommodation-request-template"],
+    objectives: [
+      "Design a first-week plan that removes ambiguity",
+      "Offer accommodations proactively rather than on request",
+    ],
   }),
 ];
 
@@ -782,6 +910,16 @@ export function getLatestQuizAttempt(userId: string, quizId: string): QuizAttemp
   return mockQuizAttempts
     .filter((a) => a.userId === userId && a.quizId === quizId)
     .sort((a, b) => new Date(b.attemptedAt).getTime() - new Date(a.attemptedAt).getTime())[0];
+}
+
+/**
+ * The video shown at the top of a course page: the course's own preview if it
+ * has one, otherwise the first lesson's video so the page is never empty.
+ */
+export function getCourseIntroVideoId(courseId: string): string | undefined {
+  const course = getCourseById(courseId);
+  if (course?.previewVideoId) return course.previewVideoId;
+  return getLessonsForCourse(courseId)[0]?.video.youtubeVideoId;
 }
 
 export function getNextLesson(lessonId: string): Lesson | undefined {

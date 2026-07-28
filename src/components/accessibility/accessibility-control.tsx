@@ -11,18 +11,18 @@ interface AccessibilityControlProps {
 
 export function AccessibilityControl({ icon: Icon, title, description, control }: AccessibilityControlProps) {
   return (
-    <Card>
-      <CardContent className="flex items-start justify-between gap-4 p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Icon className="size-5" aria-hidden="true" />
+    <Card className="transition-shadow duration-500 hover:shadow-soft-lg">
+      <CardContent className="flex items-center justify-between gap-6 p-6">
+        <div className="flex items-center gap-5">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon className="size-6" strokeWidth={1.5} aria-hidden="true" />
           </span>
-          <div>
+          <div className="space-y-1">
             <h3 className="font-semibold text-foreground">{title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
           </div>
         </div>
-        <div className="shrink-0 pt-1">{control}</div>
+        <div className="shrink-0">{control}</div>
       </CardContent>
     </Card>
   );

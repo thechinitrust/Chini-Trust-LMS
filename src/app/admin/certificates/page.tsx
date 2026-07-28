@@ -77,8 +77,8 @@ export default function AdminCertificatesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Certificates</h1>
-          <p className="mt-1 text-muted-foreground">Certificates issued automatically on course completion.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Certificates</h1>
+          <p className="mt-2 text-muted-foreground">Certificates issued automatically on course completion.</p>
         </div>
         <Button onClick={openIssue}>
           <Plus className="size-4" aria-hidden="true" />

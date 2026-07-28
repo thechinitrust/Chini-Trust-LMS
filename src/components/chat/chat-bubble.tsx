@@ -1,4 +1,4 @@
-import { Bot, User } from "lucide-react";
+import { Brain, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/lib/types";
@@ -13,7 +13,11 @@ export function ChatBubble({ message }: { message: ChatMessage }) {
           isUser ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
         )}
       >
-        {isUser ? <User className="size-4" aria-hidden="true" /> : <Bot className="size-4" aria-hidden="true" />}
+        {isUser ? (
+          <User className="size-4" strokeWidth={1.5} aria-hidden="true" />
+        ) : (
+          <Brain className="size-4" strokeWidth={1.5} aria-hidden="true" />
+        )}
       </span>
       <div
         className={cn(

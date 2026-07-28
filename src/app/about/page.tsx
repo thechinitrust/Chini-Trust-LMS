@@ -1,6 +1,12 @@
+import Image from "next/image";
 import { Target, Eye, HeartHandshake, Rocket } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+import { mockTeam } from "@/lib/mock-data";
 import { Card, CardContent } from "@/components/ui/card";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
+import { SplitReveal } from "@/components/motion/split-reveal";
+import { TiltCard } from "@/components/motion/tilt-card";
 
 const PILLARS = [
   {
@@ -21,61 +27,110 @@ const PILLARS = [
   {
     icon: Rocket,
     title: "Where we're headed",
-    body: "NeuroBridge AI launches with structured courses for teachers, alongside a growing resource library and AI-guided support. Over time we plan to expand into more audiences, deeper personalization, and a wider course catalogue shaped directly by community need.",
+    body: "NeuroBridge launches with structured courses for teachers, alongside a growing resource library and guided support. Over time we plan to expand into more audiences, deeper personalization, and a wider course catalogue shaped directly by community need.",
+  },
+];
+
+const SECTIONS = [
+  {
+    title: "Who this platform helps",
+    body: "While teachers are our primary audience at launch, NeuroBridge is built to scale to caregivers, parents, students, mental health professionals, therapists, employers, and anyone who wants to understand neurodiversity and inclusion more deeply.",
+  },
+  {
+    title: "How it supports learning and inclusion",
+    body: "Structured, self-paced courses break long-form expert knowledge into manageable modules and lessons. Downloadable resources turn that knowledge into ready-to-use tools. The NeuroGuide assistant offers a supportive, always-available first stop for specific questions. Together, they form one accessible learning journey.",
+  },
+  {
+    title: "Long-term direction",
+    body: "We're building NeuroBridge to grow with the community it serves — more courses, more resource types, deeper accessibility tooling, and closer guidance, all grounded in the same evidence-based, inclusion-first approach we started with.",
   },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="container-page py-12">
-      <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">About NeuroBridge AI</h1>
-        <p className="mt-3 text-muted-foreground">
-          NeuroBridge AI is an independent platform from The Chini Trust, built to make neurodiversity
+    <div className="container-page px-6 py-20 lg:px-12" data-focus-content="true">
+      <Reveal className="mx-auto max-w-2xl text-center">
+        <p className="text-xs font-medium tracking-widest text-primary-text uppercase">About us</p>
+        <h1 className="mt-4 font-serif text-4xl tracking-tight text-foreground sm:text-5xl">
+          <SplitReveal text="About NeuroBridge" />
+        </h1>
+        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          NeuroBridge is an independent platform from The Chini Trust, built to make neurodiversity
           education, resources, and support accessible to everyone who needs them.
         </p>
+      </Reveal>
+
+      <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
+        {PILLARS.map((pillar, i) => {
+          const isAccent = i % 2 === 1;
+          return (
+            <TiltCard key={pillar.title}>
+              <Card tone={isAccent ? "accent" : "brand"} interactive className="group flex h-full flex-row overflow-hidden">
+                <div
+                  className={cn(
+                    "flex w-24 shrink-0 flex-col items-center justify-center bg-gradient-to-br text-primary-foreground transition-all duration-500 group-hover:brightness-110",
+                    isAccent ? "from-accent to-ink" : "from-primary to-ink"
+                  )}
+                >
+                  <span className="drop-shadow-sm transition-transform duration-500 group-hover:scale-110">
+                    <pillar.icon className="size-14" strokeWidth={1} aria-hidden="true" />
+                  </span>
+                </div>
+                <CardContent className="flex flex-1 flex-col p-6 sm:p-7">
+                  <h2 className="font-serif text-xl text-foreground">{pillar.title}</h2>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{pillar.body}</p>
+                </CardContent>
+              </Card>
+            </TiltCard>
+          );
+        })}
       </div>
 
-      <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-2">
-        {PILLARS.map((pillar) => (
-          <Card key={pillar.title}>
-            <CardContent className="p-6">
-              <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <pillar.icon className="size-5" aria-hidden="true" />
-              </span>
-              <h2 className="mt-4 font-semibold text-foreground">{pillar.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{pillar.body}</p>
-            </CardContent>
-          </Card>
+      {/* ---- Team ---- */}
+      <section className="mt-24">
+        <Reveal className="mx-auto max-w-2xl text-center" variant="blur">
+          <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Our team</p>
+          <h2 className="mt-4 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
+            The people behind NeuroBridge
+          </h2>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            A small team of educators, accessibility specialists, and community organisers.
+          </p>
+        </Reveal>
+
+        <RevealGroup className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {mockTeam.map((member) => (
+            <RevealItem key={member.id}>
+              <Card interactive className="h-full overflow-hidden text-center">
+                <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                  <Image
+                    src={member.photoUrl}
+                    alt={`${member.name}, ${member.role}`}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out hover:scale-105"
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  />
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="font-serif text-lg text-foreground">{member.name}</h3>
+                  <p className="mt-1 text-xs font-medium tracking-wide text-primary-text uppercase">
+                    {member.role}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
+                </CardContent>
+              </Card>
+            </RevealItem>
+          ))}
+        </RevealGroup>
+      </section>
+
+      <div className="mx-auto mt-24 max-w-3xl space-y-12">
+        {SECTIONS.map((section) => (
+          <Reveal key={section.title} variant="scale">
+            <h2 className="font-serif text-2xl text-foreground">{section.title}</h2>
+            <p className="mt-3 leading-relaxed text-muted-foreground">{section.body}</p>
+          </Reveal>
         ))}
-      </div>
-
-      <div className="mx-auto mt-14 max-w-3xl space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">Who this platform helps</h2>
-          <p className="mt-2 text-muted-foreground">
-            While teachers are our primary audience at launch, NeuroBridge AI is built to scale to
-            caregivers, parents, students, mental health professionals, therapists, employers, and
-            anyone who wants to understand neurodiversity and inclusion more deeply.
-          </p>
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">How it supports learning and inclusion</h2>
-          <p className="mt-2 text-muted-foreground">
-            Structured, self-paced courses break long-form expert knowledge into manageable modules
-            and lessons. Downloadable resources turn that knowledge into ready-to-use tools. The AI
-            NeuroGuide assistant offers a supportive, always-available first stop for specific
-            questions. Together, they form one accessible learning journey.
-          </p>
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">Long-term direction</h2>
-          <p className="mt-2 text-muted-foreground">
-            We&apos;re building NeuroBridge AI to grow with the community it serves — more courses, more
-            resource types, deeper accessibility tooling, and closer AI guidance, all grounded in the
-            same evidence-based, inclusion-first approach we started with.
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ export function AdminTable<T>({
   }
 
   return (
-    <div className="rounded-xl border border-border">
+    <div className="rounded-2xl border border-border">
       <Table>
         <TableHeader>
           <TableRow>

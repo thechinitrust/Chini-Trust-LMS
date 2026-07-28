@@ -88,8 +88,8 @@ export default function AdminQuizzesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Quizzes</h1>
-          <p className="mt-1 text-muted-foreground">Manage assessments attached to each module.</p>
+          <h1 className="font-serif text-3xl tracking-tight text-foreground">Quizzes</h1>
+          <p className="mt-2 text-muted-foreground">Manage assessments attached to each module.</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" aria-hidden="true" />

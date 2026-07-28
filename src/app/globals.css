@@ -1,82 +1,284 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* --- The Chini Trust (TCT) palette --------------------------------------
+     Fixed brand colors (do not change): Primary — Dark Olive #4F4D21,
+     Secondary — Olive Green #888820.
+     The rest of the palette uses complementary neutral and warm alabaster tones
+     for an elegant, clean, and premium look.
+     ------------------------------------------------------------------------ */
+  --background: #fcfbf9;
+  --foreground: #26251b;
+
+  --card: #ffffff;
+  --card-foreground: #26251b;
+  /* Second-tier card tone — used to break up grids of same-colored cards */
+  --card-subtle: #f0ede4;
+  /* Highlight/callout surface for "important" cards */
+  --card-brand: color-mix(in srgb, #4f4d21 12%, #ffffff);
+  /* Secondary-brand-tinted surface — pairs with card-brand for alternating grids */
+  --card-accent: color-mix(in srgb, #888820 15%, #ffffff);
+
+  --popover: #ffffff;
+  --popover-foreground: #26251b;
+
+  /* Primary brand — Dark Olive Green (fixed). Headings, primary buttons, nav, icons. */
+  --primary: #4f4d21;
+  --primary-foreground: #ffffff;
+  --primary-text: #4f4d21;
+
+  /* Secondary brand — Olive Green (fixed). Used for badges/chips as a pale pill background. */
+  --secondary: color-mix(in srgb, #888820 12%, #fcfbf9);
+  --secondary-foreground: #3d3d0e;
+
+  --muted: #e6e3da;
+  --muted-foreground: #5c594c;
+
+  /* Solid-fill form of the secondary brand color */
+  --accent: #888820;
+  --accent-foreground: #1c1a08;
+  --accent-text: #6b6b19;
+
+  /* Semantic colors tuned warmer so they sit naturally alongside the olive brand */
+  --success: #297347;
+  --success-foreground: #ffffff;
+  --success-text: #1d5733;
+
+  --warning: #c27617;
+  --warning-foreground: #ffffff;
+  --warning-text: #965a0b;
+
+  --destructive: #c44141;
+  --destructive-foreground: #ffffff;
+
+  --border: #d4cfc1;
+  --input: #d4cfc1;
+  /* Branded focus ring */
+  --ring: #4f4d21;
+
+  /* --- "Ink" surfaces — deep charcoal/umber tones used sparingly for
+     premium contrast moments (footer, showcase CTA panels, rich hover
+     shadows) so the interface reads as layered rather than flat, without
+     ever outranking the two brand colors. */
+  --ink: #4a4527;
+  --ink-foreground: #fbf8ee;
+  --ink-muted-foreground: color-mix(in srgb, #fbf8ee 68%, transparent);
+  --ink-card: #55502f;
+  --ink-border: color-mix(in srgb, #fbf8ee 16%, transparent);
+  /* Brand glows read on an ink surface need to be lighter than the (dark)
+     brand colors themselves, or they'd vanish into the dark background. */
+  --ink-glow-primary: #b3af6e;
+  --ink-glow-accent: #d4d45a;
+
+  --radius: 0.85rem;
+
+  --font-dyslexic: "OpenDyslexic", "Comic Sans MS", "Comic Sans", Verdana, sans-serif;
+}
+
+.dark {
+  --background: #151513;
+  --foreground: #e8e6df;
+
+  --card: #1c1c1a;
+  --card-foreground: #e8e6df;
+  --card-subtle: #22221f;
+  --card-brand: color-mix(in srgb, #4f4d21 40%, #1c1c1a);
+  --card-accent: color-mix(in srgb, #888820 30%, #1c1c1a);
+
+  --popover: #1c1c1a;
+  --popover-foreground: #e8e6df;
+
+  --primary: #c2be78;
+  --primary-foreground: #1c1b0c;
+  --primary-text: #cfcba1;
+
+  --secondary: color-mix(in srgb, #888820 30%, #1c1c1a);
+  --secondary-foreground: #d9d977;
+
+  --muted: #2a2a26;
+  --muted-foreground: #8f8d83;
+
+  --accent: #cccc52;
+  --accent-foreground: #1a1a06;
+  --accent-text: #e0e07b;
+
+  --success: #3b9e62;
+  --success-foreground: #ffffff;
+  --success-text: #50c47d;
+
+  --warning: #d98a2b;
+  --warning-foreground: #1a1306;
+  --warning-text: #f0a348;
+
+  --destructive: #e05e5e;
+  --destructive-foreground: #ffffff;
+
+  --border: #33332e;
+  --input: #33332e;
+  --ring: #c2be78;
+
+  /* Ink surfaces sit *below* the already-dark page background — a near-black
+     panel that still reads as a deliberate deep accent rather than "more of
+     the same dark". Glows reuse the theme's brand tokens, which are already
+     light in dark mode. */
+  --ink: #0c0b07;
+  --ink-foreground: #f3efe2;
+  --ink-muted-foreground: color-mix(in srgb, #f3efe2 62%, transparent);
+  --ink-card: #18170f;
+  --ink-border: color-mix(in srgb, #f3efe2 12%, transparent);
+  --ink-glow-primary: var(--primary);
+  --ink-glow-accent: var(--accent);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-subtle: var(--card-subtle);
+  --color-card-brand: var(--card-brand);
+  --color-card-accent: var(--card-accent);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-text: var(--accent-text);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-text: var(--warning-text);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted-foreground: var(--ink-muted-foreground);
+  --color-ink-card: var(--ink-card);
+  --color-ink-border: var(--ink-border);
+  --color-ink-glow-primary: var(--ink-glow-primary);
+  --color-ink-glow-accent: var(--ink-glow-accent);
+
+  --radius-sm: calc(var(--radius) - 0.4rem);
+  --radius-md: calc(var(--radius) - 0.2rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --radius-2xl: calc(var(--radius) + 0.65rem);
+  --radius-3xl: calc(var(--radius) + 1.15rem);
+
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  /* Premium Elevation ladder — cards step up through these on rest → hover */
+  --shadow-soft:
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 4px 12px -4px rgba(0, 0, 0, 0.04),
+    0 16px 32px -16px rgba(0, 0, 0, 0.08);
+  --shadow-soft-lg:
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 16px 32px -8px rgba(0, 0, 0, 0.06),
+    0 48px 96px -24px rgba(0, 0, 0, 0.12);
+  --shadow-glow-brand:
+    0 0 0 1px rgba(79, 77, 33, 0.1),
+    0 12px 32px -12px rgba(79, 77, 33, 0.25);
+  /* Brand-tinted lift used on card hover so elevation reads as "on brand" */
+  --shadow-brand-hover:
+    0 4px 12px rgba(79, 77, 33, 0.06),
+    0 16px 40px -12px rgba(79, 77, 33, 0.16),
+    0 56px 108px -28px rgba(8, 7, 4, 0.28);
+  /* Secondary-brand (olive green) counterparts — for secondary CTAs and accent-toned cards */
+  --shadow-glow-accent:
+    0 0 0 1px rgba(136, 136, 32, 0.15),
+    0 12px 32px -12px rgba(136, 136, 32, 0.3);
+  --shadow-accent-hover:
+    0 4px 12px rgba(136, 136, 32, 0.06),
+    0 16px 40px -12px rgba(136, 136, 32, 0.16),
+    0 56px 108px -28px rgba(8, 7, 4, 0.28);
+  /* Deep, dramatic elevation for elements on — or hovering toward — an ink
+     surface. Deliberately near-neutral so it reads as "premium depth"
+     rather than another brand-tinted glow. */
+  --shadow-ink:
+    0 4px 16px rgba(8, 7, 4, 0.16),
+    0 24px 48px -16px rgba(8, 7, 4, 0.32),
+    0 56px 96px -32px rgba(8, 7, 4, 0.4);
+
+  /* Custom easing curves — deliberately varied so entrance/hover motion
+     doesn't feel like the same tween repeated everywhere. */
+  --ease-buttery: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-swift: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-shimmer: shimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222 30% 14%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 30% 14%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 30% 14%;
-
-    /* Brand accent #888820 — reserved for primary CTAs, active states, key
-       headings/icons, progress accents & badges. Not used as a fill color. */
-    --primary: 60 62% 33%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Soft blue — the everyday interactive/secondary accent */
-    --secondary: 210 60% 96%;
-    --secondary-foreground: 213 70% 30%;
-
-    --muted: 210 25% 96%;
-    --muted-foreground: 215 16% 46%;
-
-    --accent: 210 70% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    --success: 152 55% 36%;
-    --success-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 214 20% 90%;
-    --input: 214 20% 88%;
-    --ring: 210 70% 55%;
-
-    --radius: 0.75rem;
-
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, sans-serif;
-    --font-dyslexic: "OpenDyslexic", "Comic Sans MS", "Comic Sans", Verdana,
-      sans-serif;
+  * {
+    border-color: var(--border);
   }
 
-  .dark {
-    --background: 222 32% 8%;
-    --foreground: 210 30% 94%;
+  html {
+    scroll-behavior: smooth;
+  }
 
-    --card: 222 28% 11%;
-    --card-foreground: 210 30% 94%;
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings:
+      "cv02",
+      "cv03",
+      "cv04",
+      "cv11";
+  }
 
-    --popover: 222 28% 11%;
-    --popover-foreground: 210 30% 94%;
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 
-    --primary: 60 55% 52%;
-    --primary-foreground: 222 32% 10%;
+  ::selection {
+    background-color: color-mix(in srgb, var(--primary) 24%, transparent);
+    color: var(--foreground);
+  }
 
-    --secondary: 213 30% 18%;
-    --secondary-foreground: 210 60% 88%;
-
-    --muted: 217 25% 17%;
-    --muted-foreground: 215 16% 65%;
-
-    --accent: 210 80% 65%;
-    --accent-foreground: 222 32% 10%;
-
-    --success: 152 45% 46%;
-    --success-foreground: 0 0% 100%;
-
-    --destructive: 0 62% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 217 25% 20%;
-    --input: 217 25% 22%;
-    --ring: 210 80% 65%;
+  /* Thin, unobtrusive scrollbars for a quieter chrome */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 999px;
+    border: 2px solid var(--background);
   }
 
   /* Accessibility: dyslexia-friendly typography mode */
@@ -84,7 +286,13 @@
   .font-dyslexic {
     font-family: var(--font-dyslexic);
     letter-spacing: 0.02em;
-    line-height: 1.7;
+    line-height: 1.75;
+  }
+  .font-dyslexic h1,
+  .font-dyslexic h2,
+  .font-dyslexic h3,
+  .font-dyslexic h4 {
+    font-family: var(--font-dyslexic);
   }
 
   /* Accessibility: larger base text size mode */
@@ -95,32 +303,156 @@
     font-size: 125%;
   }
 
-  /* Accessibility: focus mode dims non-essential chrome */
-  .focus-mode [data-focus-dim="true"] {
-    opacity: 0.35;
-    pointer-events: none;
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  }
-  :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 90rem;
+}
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility: Focus mode — a genuine distraction-free reading mode.
+   Chrome marked [data-focus-hide] is removed outright; the element marked
+   [data-focus-content] becomes a centered reading column.
+
+   These rules are deliberately UNLAYERED: unlayered CSS outranks every
+   @layer (including Tailwind's utilities), so a page's own `container-page`
+   / padding utilities can't win over the reading-mode measure.
+   --------------------------------------------------------------------------- */
+.focus-mode [data-focus-hide="true"] {
+  display: none !important;
+}
+
+/* Legacy hook — anything only *dimmed* rather than hidden */
+.focus-mode [data-focus-dim="true"] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.focus-mode [data-focus-content="true"] {
+  margin-inline: auto;
+  max-width: 46rem;
+  padding-inline: 1.5rem;
+  padding-block: 4.5rem 3rem;
+}
+
+/* Collapse multi-column learning layouts into a single reading column */
+.focus-mode [data-focus-content="true"] [data-focus-grid="true"] {
+  display: block;
+}
+
+.focus-mode [data-focus-content="true"] [data-focus-aside="true"] {
+  display: none;
+}
+
+/* Roomier rhythm while reading */
+.focus-mode [data-focus-content="true"] p,
+.focus-mode [data-focus-content="true"] li {
+  line-height: 1.8;
+}
+
+/* Subtle brand-tinted top border used to make "important" cards read as primary */
+@utility card-brand-rail {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--primary) 85%, transparent),
+      color-mix(in srgb, var(--primary) 25%, transparent)
+    );
   }
 }
 
-@layer utilities {
-  .container-page {
-    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+/* Indigo counterpart to card-brand-rail — for accent-toned cards */
+@utility card-accent-rail {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--accent) 85%, transparent),
+      color-mix(in srgb, var(--accent) 25%, transparent)
+    );
   }
-  .sr-only-focusable {
-    @apply sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
-  }
+}
+
+/* Two-tone brand gradient — the signature "premium" background treatment
+   pairing the olive primary with the indigo secondary. Used behind hero
+   panels, CTA sections and other showcase surfaces. */
+@utility bg-brand-mesh {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 15% 10%, color-mix(in srgb, var(--primary) 16%, transparent), transparent),
+    radial-gradient(ellipse 55% 45% at 90% 30%, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
+}
+
+/* Deep "ink" mesh — the dramatic-contrast counterpart to bg-brand-mesh, for
+   showcase panels (footer, closing CTA) that need to read as a deliberate
+   premium moment rather than another light section. */
+@utility bg-ink-mesh {
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(ellipse 65% 55% at 12% 0%, color-mix(in srgb, var(--ink-glow-primary) 32%, transparent), transparent),
+    radial-gradient(ellipse 55% 50% at 100% 15%, color-mix(in srgb, var(--ink-glow-accent) 26%, transparent), transparent),
+    radial-gradient(ellipse 50% 45% at 45% 100%, color-mix(in srgb, var(--ink-glow-primary) 16%, transparent), transparent);
+}
+
+/* Diagonal duotone wash for smaller decorative surfaces (badges, chips, panels) */
+@utility bg-brand-duo {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 12%, transparent),
+    color-mix(in srgb, var(--accent) 12%, transparent)
+  );
+}
+
+/* Gradient text spanning both brand colors — for a single showcase headline moment */
+@utility text-brand-gradient {
+  background-image: linear-gradient(100deg, var(--primary-text), var(--accent-text));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Glassmorphism utilities */
+@utility glass {
+  background-color: color-mix(in srgb, var(--background) 70%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+@utility glass-card {
+  background-color: color-mix(in srgb, var(--card) 60%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  box-shadow: var(--shadow-soft);
 }

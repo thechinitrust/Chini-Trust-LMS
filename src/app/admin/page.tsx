@@ -1,17 +1,11 @@
 import Link from "next/link";
 import { BookOpen, Users, CheckCircle2, ListChecks, ArrowRight } from "lucide-react";
 
-import {
-  mockCourses,
-  mockLessons,
-  mockProfiles,
-  mockQuizzes,
-  mockQuizAttempts,
-  mockEnrollments,
-} from "@/lib/mock-data";
+import { mockCourses, mockLessons, mockProfiles, mockQuizzes, mockQuizAttempts, mockEnrollments } from "@/lib/mock-data";
 import { DashboardStatCard } from "@/components/shared/dashboard-stat-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 
 export default function AdminOverviewPage() {
   const totalLearners = mockProfiles.filter((p) => p.role === "learner").length;
@@ -37,19 +31,30 @@ export default function AdminOverviewPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin overview</h1>
-      <p className="mt-1 text-muted-foreground">A snapshot of NeuroBridge AI content and learners.</p>
+      <Reveal>
+        <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Admin</p>
+        <h1 className="mt-2 font-serif text-3xl tracking-tight text-foreground">Admin overview</h1>
+        <p className="mt-2 text-muted-foreground">A snapshot of NeuroBridge content and learners.</p>
+      </Reveal>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <DashboardStatCard icon={BookOpen} label="Total courses" value={mockCourses.length} accent />
-        <DashboardStatCard icon={Users} label="Total learners" value={totalLearners} />
-        <DashboardStatCard icon={CheckCircle2} label="Completion rate" value={`${completionRate}%`} />
-        <DashboardStatCard icon={ListChecks} label="Pending quizzes" value={pendingQuizzes} />
-      </div>
+      <RevealGroup className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <RevealItem>
+          <DashboardStatCard icon={BookOpen} label="Total courses" value={mockCourses.length} tone="primary" />
+        </RevealItem>
+        <RevealItem>
+          <DashboardStatCard icon={Users} label="Total learners" value={totalLearners} tone="accent" />
+        </RevealItem>
+        <RevealItem>
+          <DashboardStatCard icon={CheckCircle2} label="Completion rate" value={`${completionRate}%`} />
+        </RevealItem>
+        <RevealItem>
+          <DashboardStatCard icon={ListChecks} label="Pending quizzes" value={pendingQuizzes} />
+        </RevealItem>
+      </RevealGroup>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <Reveal delay={0.1} className="mt-10 grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-7">
             <h2 className="font-semibold text-foreground">Published vs. draft courses</h2>
             <div>
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -58,14 +63,18 @@ export default function AdminOverviewPage() {
                   {publishedCourses} / {mockCourses.length}
                 </span>
               </div>
-              <Progress value={(publishedCourses / Math.max(mockCourses.length, 1)) * 100} className="mt-2" />
+              <Progress
+                value={(publishedCourses / Math.max(mockCourses.length, 1)) * 100}
+                className="mt-2.5"
+                aria-label="Published courses"
+              />
             </div>
             <p className="text-xs text-muted-foreground">{draftCourses} course(s) still in draft.</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="space-y-4 p-6">
+          <CardContent className="space-y-4 p-7">
             <h2 className="font-semibold text-foreground">Published vs. draft lessons</h2>
             <div>
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -74,27 +83,34 @@ export default function AdminOverviewPage() {
                   {publishedLessons} / {mockLessons.length}
                 </span>
               </div>
-              <Progress value={(publishedLessons / Math.max(mockLessons.length, 1)) * 100} className="mt-2" />
+              <Progress
+                value={(publishedLessons / Math.max(mockLessons.length, 1)) * 100}
+                className="mt-2.5"
+                aria-label="Published lessons"
+                tone="accent"
+              />
             </div>
             <p className="text-xs text-muted-foreground">{draftLessons} lesson(s) still in draft.</p>
           </CardContent>
         </Card>
-      </div>
+      </Reveal>
 
       <div className="mt-10">
         <h2 className="font-semibold text-foreground">Quick links</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealGroup className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {quickLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
-              <Card className="transition-colors hover:bg-muted/50">
-                <CardContent className="flex items-center justify-between p-4">
-                  <span className="text-sm font-medium text-foreground">{link.label}</span>
-                  <ArrowRight className="size-4 text-muted-foreground" aria-hidden="true" />
-                </CardContent>
-              </Card>
-            </Link>
+            <RevealItem key={link.href}>
+              <Link href={link.href}>
+                <Card className="transition-shadow duration-500 hover:shadow-soft-lg">
+                  <CardContent className="flex items-center justify-between p-5">
+                    <span className="text-sm font-medium text-foreground">{link.label}</span>
+                    <ArrowRight className="size-4 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                  </CardContent>
+                </Card>
+              </Link>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </div>
   );

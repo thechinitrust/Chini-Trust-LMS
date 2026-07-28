@@ -1,8 +1,13 @@
-# NeuroBridge AI
+# NeuroBridge
 
 An accessibility-first platform for The Chini Trust: a neurodiversity
-learning platform (LMS), resource library, and AI guidance assistant for
+learning platform (LMS), resource library, and guidance assistant for
 students, parents, teachers, employers, and neurodivergent individuals.
+
+Brand colour: `#888820`. Accessibility tooling (dark mode, dyslexia-friendly
+type, text scaling, focus mode, read-aloud) is a first-class feature, not an
+add-on — see `src/context/accessibility-context.tsx` and
+`src/components/accessibility/`.
 
 This is the frontend scaffold — full routing, UI, and realistic sample data,
 built to be wired up to Supabase next. Nothing here is connected to a real

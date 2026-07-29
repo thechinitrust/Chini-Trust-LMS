@@ -6,17 +6,18 @@ interface QuizCardProps {
   question: QuizQuestion;
   index: number;
   total: number;
-  selectedOptionId?: string;
+  selectedOptionIds?: string[];
   onSelect: (optionId: string) => void;
   reviewMode?: boolean;
 }
 
-export function QuizCard({ question, index, total, selectedOptionId, onSelect, reviewMode }: QuizCardProps) {
+export function QuizCard({ question, index, total, selectedOptionIds, onSelect, reviewMode }: QuizCardProps) {
   return (
     <Card>
       <CardContent className="space-y-5 p-7">
         <p className="text-xs font-medium tracking-widest text-primary-text uppercase">
           Question {index + 1} of {total}
+          {question.type === "multiple-choice" && !reviewMode && " — select all that apply"}
         </p>
         <h3 className="text-lg font-semibold text-foreground">{question.question}</h3>
         <div className="space-y-2.5">
@@ -24,7 +25,7 @@ export function QuizCard({ question, index, total, selectedOptionId, onSelect, r
             <QuizOption
               key={option.id}
               option={option}
-              selected={selectedOptionId === option.id}
+              selected={selectedOptionIds?.includes(option.id) ?? false}
               onSelect={() => onSelect(option.id)}
               reviewMode={reviewMode}
             />

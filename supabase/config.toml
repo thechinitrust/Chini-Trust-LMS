@@ -69,6 +69,8 @@ schema_paths = [
   "./schemas/40_quizzes.sql",
   "./schemas/50_certificates.sql",
   "./schemas/60_accessibility.sql",
+  "./schemas/70_events.sql",
+  "./schemas/80_completion.sql",
 ]
 
 [db.seed]

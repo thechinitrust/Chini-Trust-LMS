@@ -36,7 +36,7 @@ function initials(name: string) {
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const { user, logout } = useAuth();
   const [mounted, setMounted] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -86,6 +86,42 @@ export function Navbar() {
               </Link>
             );
           })}
+          {user && (
+            <Link
+              href="/dashboard"
+              className={cn(
+                "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && "text-primary-text"
+              )}
+            >
+              {(pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && (
+                <motion.span
+                  layoutId="navbar-active-pill"
+                  className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5"><LayoutDashboard className="size-4" strokeWidth={1.5} /> Dashboard</span>
+            </Link>
+          )}
+          {user?.role === "admin" && (
+            <Link
+              href="/admin"
+              className={cn(
+                "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                (pathname === "/admin" || pathname.startsWith("/admin/")) && "text-primary-text"
+              )}
+            >
+              {(pathname === "/admin" || pathname.startsWith("/admin/")) && (
+                <motion.span
+                  layoutId="navbar-active-pill"
+                  className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5"><ShieldCheck className="size-4" strokeWidth={1.5} /> Admin</span>
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -93,18 +129,18 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             aria-label="Toggle dark mode"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
-                key={mounted && theme === "dark" ? "sun" : "moon"}
+                key={mounted && resolvedTheme === "dark" ? "sun" : "moon"}
                 initial={{ opacity: 0, rotate: -60, scale: 0.6 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
                 exit={{ opacity: 0, rotate: 60, scale: 0.6 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 className="flex"
               >
-                {mounted && theme === "dark" ? (
+                {mounted && resolvedTheme === "dark" ? (
                   <Sun className="size-5" strokeWidth={1.5} />
                 ) : (
                   <Moon className="size-5" strokeWidth={1.5} />
@@ -126,19 +162,6 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel className="font-normal text-muted-foreground">{user.email}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                      <LayoutDashboard className="size-4" strokeWidth={1.5} /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  {user.role === "admin" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="flex items-center gap-2">
-                        <ShieldCheck className="size-4" strokeWidth={1.5} /> Admin panel
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={handleLogout} className="flex items-center gap-2 text-destructive focus:text-destructive">
                     <LogOut className="size-4" strokeWidth={1.5} /> Log out
@@ -191,7 +214,10 @@ export function Navbar() {
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                      className={cn(
+                        "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                        pathname === "/dashboard" || pathname.startsWith("/dashboard/") ? "bg-primary/12 text-primary-text" : "text-foreground"
+                      )}
                     >
                       Dashboard
                     </Link>
@@ -199,7 +225,10 @@ export function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                        className={cn(
+                          "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                          pathname === "/admin" || pathname.startsWith("/admin/") ? "bg-primary/12 text-primary-text" : "text-foreground"
+                        )}
                       >
                         Admin panel
                       </Link>

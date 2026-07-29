@@ -37,7 +37,6 @@ export interface Course {
   objectives: string[];
   requiresCertificate: boolean;
   published: boolean;
-  moduleIds: string[];
   createdAt: string;
   /**
    * Optional course-level intro/trailer video shown at the top of the course
@@ -52,8 +51,6 @@ export interface Module {
   title: string;
   description: string;
   order: number;
-  lessonIds: string[];
-  quizId?: string;
 }
 
 /** Metadata-only video reference — the file itself lives on YouTube. */
@@ -73,7 +70,6 @@ export interface Lesson {
   order: number;
   published: boolean;
   video: YoutubeVideoMeta;
-  resourceIds: string[];
   /** What the learner should be able to do after this specific lesson. */
   objectives?: string[];
 }
@@ -139,7 +135,6 @@ export interface Quiz {
   title: string;
   description: string;
   passThreshold: number;
-  questionIds: string[];
 }
 
 export interface QuizAttempt {
@@ -188,4 +183,18 @@ export interface TeamMember {
   role: string;
   bio: string;
   photoUrl: string;
+}
+
+export type EventCategory = "webinar" | "deadline" | "live-qa" | "announcement";
+
+export interface LmsEvent {
+  id: string;
+  title: string;
+  description: string;
+  startsAt: string;
+  endsAt?: string;
+  location?: string;
+  linkUrl?: string;
+  category: EventCategory;
+  published: boolean;
 }

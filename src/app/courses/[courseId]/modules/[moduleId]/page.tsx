@@ -1,35 +1,57 @@
-"use client";
-
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowRight, FileText, ListChecks } from "lucide-react";
 
-import { useAuth } from "@/context/auth-context";
-import { useLocalProgress } from "@/hooks/use-local-progress";
-import { getCourseById, getModuleById, getLessonsForModule, getQuizForModule, mockResources } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { getCourseBySlug } from "@/lib/data/courses";
+import { getModuleById } from "@/lib/data/modules";
+import { getLessonsForModule } from "@/lib/data/lessons";
+import { getQuizForModule } from "@/lib/data/quizzes";
+import { getResourcesForModule } from "@/lib/data/resources";
+import { getProgressForUser } from "@/lib/data/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonCard } from "@/components/shared/lesson-card";
 import { Reveal } from "@/components/motion/reveal";
 
-export default function ModulePage() {
-  const params = useParams<{ courseId: string; moduleId: string }>();
-  const course = getCourseById(params.courseId);
-  const courseModule = getModuleById(params.moduleId);
-  const { user } = useAuth();
-  const progress = useLocalProgress(user?.id ?? "anonymous");
+export default async function ModulePage({
+  params,
+}: {
+  params: Promise<{ courseId: string; moduleId: string }>;
+}) {
+  const { courseId: courseSlug, moduleId } = await params;
+  const supabase = await createClient();
 
-  if (!course || !courseModule || courseModule.courseId !== course.id) notFound();
+  const course = await getCourseBySlug(supabase, courseSlug);
+  if (!course) notFound();
 
-  const lessons = getLessonsForModule(courseModule.id);
-  const quiz = getQuizForModule(courseModule.id);
-  const resources = mockResources.filter((r) => lessons.some((l) => l.resourceIds.includes(r.id)));
+  const courseModule = await getModuleById(supabase, moduleId);
+  if (!courseModule || courseModule.courseId !== course.id) notFound();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [lessons, quiz, completedLessonIds] = await Promise.all([
+    getLessonsForModule(supabase, courseModule.id),
+    getQuizForModule(supabase, courseModule.id),
+    user
+      ? getProgressForUser(supabase, user.id).then(
+          (rows) => new Set(rows.filter((p) => p.completed).map((p) => p.lessonId))
+        )
+      : Promise.resolve(new Set<string>()),
+  ]);
+  const resources = await getResourcesForModule(
+    supabase,
+    courseModule.id,
+    lessons.map((l) => l.id)
+  );
 
   return (
     <div className="container-page px-6 py-16 lg:px-12" data-focus-content="true">
       <Reveal>
         <nav className="text-sm text-muted-foreground">
-          <Link href={`/courses/${course.id}`} className="hover:text-primary-text">
+          <Link href={`/courses/${course.slug}`} className="hover:text-primary-text">
             {course.title}
           </Link>
         </nav>
@@ -46,7 +68,7 @@ export default function ModulePage() {
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]" data-focus-grid="true">
         <Reveal delay={0.1} className="space-y-1">
           {lessons.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} completed={progress.isLessonCompleted(lesson.id)} />
+            <LessonCard key={lesson.id} lesson={lesson} completed={completedLessonIds.has(lesson.id)} />
           ))}
         </Reveal>
 

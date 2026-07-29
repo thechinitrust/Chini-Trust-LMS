@@ -48,7 +48,7 @@ export function CourseCard({ course, progress }: CourseCardProps) {
           </div>
           {typeof progress === "number" && <ProgressBar value={progress} />}
           <Link
-            href={`/courses/${course.id}`}
+            href={`/courses/${course.slug}`}
             className="inline-flex items-center gap-1.5 pt-1 text-sm font-semibold text-primary-text"
           >
             {typeof progress === "number" && progress > 0 ? "Continue learning" : "Learn more"}

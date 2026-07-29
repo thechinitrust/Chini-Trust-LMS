@@ -12,7 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Reveal } from "@/components/motion/reveal";
 import { SplitReveal } from "@/components/motion/split-reveal";
 import { TiltCard } from "@/components/motion/tilt-card";
-import { mockCourses, mockResources } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { listCourses } from "@/lib/data/courses";
+import { listResources } from "@/lib/data/resources";
 
 const FEATURES = [
   {
@@ -50,9 +52,11 @@ const AUDIENCES = [
 
 import { MagneticButton } from "@/components/motion/magnetic-button";
 
-export default function HomePage() {
-  const featuredCourses = mockCourses.slice(0, 3);
-  const featuredResources = mockResources.filter((r) => r.featured).slice(0, 3);
+export default async function HomePage() {
+  const supabase = await createClient();
+  const [courses, resources] = await Promise.all([listCourses(supabase), listResources(supabase)]);
+  const featuredCourses = courses.filter((c) => c.published).slice(0, 3);
+  const featuredResources = resources.filter((r) => r.featured).slice(0, 3);
 
   return (
     <>

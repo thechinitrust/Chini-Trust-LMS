@@ -12,6 +12,7 @@ import {
   ListChecks,
   Users,
   Award,
+  CalendarDays,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const ADMIN_LINKS = [
   { href: "/admin/lessons", label: "Lessons & Videos", icon: PlayCircle },
   { href: "/admin/resources", label: "Resources", icon: FileText },
   { href: "/admin/quizzes", label: "Quizzes", icon: ListChecks },
+  { href: "/admin/events", label: "Events", icon: CalendarDays },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/certificates", label: "Certificates", icon: Award },
 ];

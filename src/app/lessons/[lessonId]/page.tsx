@@ -1,121 +1,102 @@
-"use client";
-
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Download,
-  FileText,
-  ListChecks,
-  NotebookText,
-  Target,
-} from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, CheckCircle2, Download, FileText, ListChecks, NotebookText, Target } from "lucide-react";
 
-import { useAuth } from "@/context/auth-context";
-import { useLocalProgress } from "@/hooks/use-local-progress";
-import { notify } from "@/lib/toast";
+import { createClient } from "@/lib/supabase/server";
+import { getCourseById } from "@/lib/data/courses";
+import { getLessonById, getLessonsForCourse, getLessonsForModule, getNextLesson, getPreviousLesson } from "@/lib/data/lessons";
+import { getModuleById, getModulesForCourse } from "@/lib/data/modules";
+import { getQuizForModule } from "@/lib/data/quizzes";
+import { getResourcesForLesson } from "@/lib/data/resources";
+import { enrollInCourse, getEnrollment } from "@/lib/data/enrollments";
+import { getCourseCompletionPercent, getProgressForLesson, getProgressForUser } from "@/lib/data/progress";
 import { formatDuration } from "@/lib/youtube";
-import {
-  getCourseById,
-  getLessonById,
-  getModuleById,
-  getModulesForCourse,
-  getLessonsForModule,
-  getLessonsForCourse,
-  getNextLesson,
-  getPreviousLesson,
-  getQuizForModule,
-  mockResources,
-} from "@/lib/mock-data";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { YouTubeEmbedPlayer } from "@/components/shared/youtube-embed-player";
+import { Button } from "@/components/ui/button";
 import { ModuleList } from "@/components/shared/module-list";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { Reveal } from "@/components/motion/reveal";
+import { LessonPlayer } from "./lesson-player";
 
-export default function LessonPage() {
-  const params = useParams<{ lessonId: string }>();
-  const lesson = getLessonById(params.lessonId);
-  const { user } = useAuth();
-  const progress = useLocalProgress(user?.id ?? "anonymous");
+export default async function LessonPage({ params }: { params: Promise<{ lessonId: string }> }) {
+  const { lessonId } = await params;
+  const supabase = await createClient();
 
+  const lesson = await getLessonById(supabase, lessonId);
   if (!lesson) notFound();
 
-  const course = getCourseById(lesson.courseId);
-  const courseModule = getModuleById(lesson.moduleId);
+  const [course, courseModule] = await Promise.all([
+    getCourseById(supabase, lesson.courseId),
+    getModuleById(supabase, lesson.moduleId),
+  ]);
   if (!course || !courseModule) notFound();
 
-  const modules = getModulesForCourse(course.id);
-  const lessonsByModule = Object.fromEntries(modules.map((m) => [m.id, getLessonsForModule(m.id)]));
-  const courseLessons = getLessonsForCourse(course.id);
-  const nextLesson = getNextLesson(lesson.id);
-  const prevLesson = getPreviousLesson(lesson.id);
-  const resources = mockResources.filter((r) => lesson.resourceIds.includes(r.id));
-  const moduleQuiz = getQuizForModule(courseModule.id);
-  const isCompleted = progress.isLessonCompleted(lesson.id);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // A learner deep-linking straight to a lesson without having visited the
+  // course page yet still needs an enrollment row for progress writes to be
+  // valid (the guard_progress_enrollment trigger requires it) -- auto-enroll
+  // here rather than erroring.
+  let enrollment = user ? await getEnrollment(supabase, user.id, course.id) : undefined;
+  if (user && !enrollment) {
+    enrollment = await enrollInCourse(supabase, user.id, course.id);
+  }
+
+  const [modules, courseLessons, nextLesson, prevLesson, resources, moduleQuiz, lessonProgress, progressRows] =
+    await Promise.all([
+      getModulesForCourse(supabase, course.id),
+      getLessonsForCourse(supabase, course.id),
+      getNextLesson(supabase, lesson.id),
+      getPreviousLesson(supabase, lesson.id),
+      getResourcesForLesson(supabase, lesson.id),
+      getQuizForModule(supabase, courseModule.id),
+      user ? getProgressForLesson(supabase, user.id, lesson.id) : Promise.resolve(undefined),
+      user ? getProgressForUser(supabase, user.id) : Promise.resolve([]),
+    ]);
+  const lessonsByModule = Object.fromEntries(
+    await Promise.all(modules.map(async (m) => [m.id, await getLessonsForModule(supabase, m.id)] as const))
+  );
+  const completedLessonIds = new Set(progressRows.filter((p) => p.completed).map((p) => p.lessonId));
+  const coursePercent = user ? await getCourseCompletionPercent(supabase, user.id, course.id) : 0;
 
   const lessonIndex = courseLessons.findIndex((l) => l.id === lesson.id);
-  const coursePercent = progress.courseProgressPercent(course.id);
   const isLastInModule = (lessonsByModule[courseModule.id] ?? []).at(-1)?.id === lesson.id;
-
-  const handleComplete = () => {
-    progress.markLessonComplete(lesson.id);
-    notify.success("Lesson complete", "Nice work — your progress has been saved.");
-  };
 
   return (
     <div className="container-page px-6 py-10 lg:px-12 lg:py-14" data-focus-content="true">
-      <nav
-        className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
-        aria-label="Breadcrumb"
-      >
-        <Link href={`/courses/${course.id}`} className="transition-colors hover:text-primary-text">
+      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground" aria-label="Breadcrumb">
+        <Link href={`/courses/${course.slug}`} className="transition-colors hover:text-primary-text">
           {course.title}
         </Link>
         <span aria-hidden="true">/</span>
         <Link
-          href={`/courses/${course.id}/modules/${courseModule.id}`}
+          href={`/courses/${course.slug}/modules/${courseModule.id}`}
           className="transition-colors hover:text-primary-text"
         >
           {courseModule.title}
         </Link>
       </nav>
 
-      {/* minmax(0,…) + min-w-0 keep the video iframe from forcing the grid wider than the viewport */}
       <div
         className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[1.65fr_minmax(0,1fr)]"
         data-focus-grid="true"
       >
         <Reveal className="min-w-0">
-          {/* ---- Lesson video ---- */}
-          <YouTubeEmbedPlayer youtubeVideoId={lesson.video.youtubeVideoId} title={lesson.title} />
-
-          <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-xs font-medium tracking-widest text-primary-text uppercase">
-                Lesson {lessonIndex + 1} of {courseLessons.length} &middot;{" "}
-                {formatDuration(lesson.video.durationSeconds)}
-              </p>
-              <h1 className="mt-2 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
-                {lesson.title}
-              </h1>
-              <p className="mt-3 max-w-2xl leading-relaxed text-muted-foreground">{lesson.description}</p>
-            </div>
-            {isCompleted ? (
-              <Badge variant="success" className="shrink-0 gap-1.5 px-3.5 py-1.5">
-                <CheckCircle2 className="size-3.5" strokeWidth={1.5} aria-hidden="true" /> Completed
-              </Badge>
-            ) : (
-              <Button onClick={handleComplete} className="shrink-0">
-                <CheckCircle2 className="size-4" strokeWidth={1.5} aria-hidden="true" />
-                Mark complete
-              </Button>
-            )}
-          </div>
+          <LessonPlayer
+            lessonId={lesson.id}
+            courseId={course.id}
+            title={lesson.title}
+            description={lesson.description}
+            lessonPosition={`Lesson ${lessonIndex + 1} of ${courseLessons.length} · ${formatDuration(lesson.video.durationSeconds)}`}
+            youtubeVideoId={lesson.video.youtubeVideoId}
+            durationSeconds={lesson.video.durationSeconds}
+            userId={user?.id ?? null}
+            enrollmentId={enrollment?.id ?? null}
+            initialWatchedSeconds={lessonProgress?.watchedSeconds ?? 0}
+            initialCompleted={lessonProgress?.completed ?? false}
+          />
 
           {/* ---- Lesson objectives ---- */}
           {lesson.objectives && lesson.objectives.length > 0 && (
@@ -128,11 +109,7 @@ export default function LessonPage() {
                 <ul className="mt-3.5 space-y-2.5">
                   {lesson.objectives.map((obj) => (
                     <li key={obj} className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground">
-                      <CheckCircle2
-                        className="mt-0.5 size-4 shrink-0 text-primary"
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
                       {obj}
                     </li>
                   ))}
@@ -171,18 +148,10 @@ export default function LessonPage() {
                         className="group flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 transition-all hover:border-primary/40 hover:bg-primary/8"
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-foreground">
-                            {resource.title}
-                          </span>
-                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                            {resource.summary}
-                          </span>
+                          <span className="block truncate text-sm font-medium text-foreground">{resource.title}</span>
+                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{resource.summary}</span>
                         </span>
-                        <Download
-                          className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
+                        <Download className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" strokeWidth={1.5} aria-hidden="true" />
                       </a>
                     </li>
                   ))}
@@ -235,7 +204,7 @@ export default function LessonPage() {
               </Button>
             ) : (
               <Button variant="outline" asChild>
-                <Link href={`/courses/${course.id}`}>
+                <Link href={`/courses/${course.slug}`}>
                   Back to course
                   <ArrowRight className="size-4" strokeWidth={1.5} aria-hidden="true" />
                 </Link>
@@ -251,7 +220,7 @@ export default function LessonPage() {
               <CardContent className="p-6">
                 <ProgressBar value={coursePercent} label="Course progress" />
                 <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
-                  <Link href={`/courses/${course.id}`}>Course overview</Link>
+                  <Link href={`/courses/${course.slug}`}>Course overview</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -265,7 +234,7 @@ export default function LessonPage() {
                   <ModuleList
                     modules={modules}
                     lessonsByModule={lessonsByModule}
-                    completedLessonIds={progress.completedLessonIds}
+                    completedLessonIds={completedLessonIds}
                     activeLessonId={lesson.id}
                   />
                 </div>

@@ -1,28 +1,19 @@
-"use client";
-
-import * as React from "react";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Award, BookOpen, CheckCircle2, Clock, Layers, PlayCircle } from "lucide-react";
 
-import { useAuth } from "@/context/auth-context";
-import { useLocalProgress } from "@/hooks/use-local-progress";
-import { notify } from "@/lib/toast";
-import {
-  getCourseById,
-  getCourseIntroVideoId,
-  getEnrollment,
-  getLessonsForCourse,
-  getLessonsForModule,
-  getModulesForCourse,
-} from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { getCourseBySlug } from "@/lib/data/courses";
+import { getModulesForCourse } from "@/lib/data/modules";
+import { getLessonsForCourse, getLessonsForModule } from "@/lib/data/lessons";
+import { getEnrollment } from "@/lib/data/enrollments";
+import { getCourseCompletionPercent, getProgressForUser } from "@/lib/data/progress";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProgressBar } from "@/components/shared/progress-bar";
 import { YouTubeEmbedPlayer } from "@/components/shared/youtube-embed-player";
 import { CourseModuleAccordion } from "@/components/shared/course-module-accordion";
 import { Reveal } from "@/components/motion/reveal";
+import { CourseEnrollPanel } from "./course-enroll-panel";
 
 const AUDIENCE_LABEL: Record<string, string> = {
   students: "Students",
@@ -39,30 +30,35 @@ const CATEGORY_LABEL: Record<string, string> = {
   workplace: "Workplace Inclusion",
 };
 
-export default function CourseDetailPage() {
-  const params = useParams<{ courseId: string }>();
-  const course = getCourseById(params.courseId);
-  const { user } = useAuth();
-  const progressHook = useLocalProgress(user?.id ?? "anonymous");
-  const [localEnrolled, setLocalEnrolled] = React.useState(false);
+export default async function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
+  const { courseId: slug } = await params;
+  const supabase = await createClient();
 
+  const course = await getCourseBySlug(supabase, slug);
   if (!course) notFound();
 
-  const modules = getModulesForCourse(course.id);
-  const lessons = getLessonsForCourse(course.id);
-  const lessonsByModule = Object.fromEntries(modules.map((m) => [m.id, getLessonsForModule(m.id)]));
-  const enrollment = user ? getEnrollment(user.id, course.id) : undefined;
-  const isEnrolled = Boolean(enrollment) || localEnrolled;
-  const percent = user ? progressHook.courseProgressPercent(course.id) : 0;
-  const introVideoId = getCourseIntroVideoId(course.id);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const completedCount = lessons.filter((l) => progressHook.isLessonCompleted(l.id)).length;
-  const firstIncompleteLesson = lessons.find((l) => !progressHook.isLessonCompleted(l.id)) ?? lessons[0];
+  const [modules, lessons] = await Promise.all([
+    getModulesForCourse(supabase, course.id),
+    getLessonsForCourse(supabase, course.id),
+  ]);
+  const lessonsByModule = Object.fromEntries(
+    await Promise.all(modules.map(async (m) => [m.id, await getLessonsForModule(supabase, m.id)] as const))
+  );
 
-  const handleEnroll = () => {
-    setLocalEnrolled(true);
-    notify.success("Enrolled", `You're enrolled in ${course.title}.`);
-  };
+  const enrollment = user ? await getEnrollment(supabase, user.id, course.id) : undefined;
+  const isEnrolled = Boolean(enrollment);
+  const percent = user && isEnrolled ? await getCourseCompletionPercent(supabase, user.id, course.id) : 0;
+  const completedLessonIds = user
+    ? new Set((await getProgressForUser(supabase, user.id)).filter((p) => p.completed).map((p) => p.lessonId))
+    : new Set<string>();
+
+  const introVideoId = course.previewVideoId ?? lessons[0]?.video.youtubeVideoId;
+  const completedCount = lessons.filter((l) => completedLessonIds.has(l.id)).length;
+  const firstIncompleteLesson = lessons.find((l) => !completedLessonIds.has(l.id)) ?? lessons[0];
 
   return (
     <div className="container-page px-6 py-12 lg:px-12 lg:py-16" data-focus-content="true">
@@ -113,7 +109,6 @@ export default function CourseDetailPage() {
       </Reveal>
 
       {/* ---- Intro video + enrolment rail ---- */}
-      {/* minmax(0,…) + min-w-0 keep the video iframe from forcing the grid wider than the viewport */}
       <div
         className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[1.7fr_minmax(0,1fr)]"
         data-focus-grid="true"
@@ -167,7 +162,7 @@ export default function CourseDetailPage() {
               <CourseModuleAccordion
                 modules={modules}
                 lessonsByModule={lessonsByModule}
-                completedLessonIds={progressHook.completedLessonIds}
+                completedLessonIds={completedLessonIds}
               />
             </div>
           </div>
@@ -177,55 +172,19 @@ export default function CourseDetailPage() {
         <Reveal delay={0.15} className="min-w-0" data-focus-aside="true">
           <Card tone="brand" elevation="lifted" className="sticky top-28">
             <CardContent className="space-y-5 p-6">
-              {user && isEnrolled ? (
-                <>
-                  <ProgressBar value={percent} label="Your progress" />
-                  <p className="text-xs text-muted-foreground">
-                    {completedCount} of {lessons.length} lessons complete
-                  </p>
-                </>
-              ) : (
-                <div>
-                  <p className="font-serif text-2xl text-foreground">Free</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Full access, no payment required.</p>
-                </div>
-              )}
-
-              {!user ? (
-                <Button className="w-full" size="lg" asChild>
-                  <Link href="/login">Log in to enroll</Link>
-                </Button>
-              ) : isEnrolled ? (
-                <Button className="w-full" size="lg" asChild>
-                  <Link href={`/lessons/${firstIncompleteLesson?.id ?? lessons[0]?.id}`}>
-                    {percent > 0 ? "Continue learning" : "Start course"}
-                  </Link>
-                </Button>
-              ) : (
-                <Button className="w-full" size="lg" onClick={handleEnroll}>
-                  Enroll now
-                </Button>
-              )}
-
-              <div className="space-y-2.5 border-t border-primary/15 pt-5">
-                <p className="text-xs font-medium tracking-widest text-primary-text uppercase">This course includes</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <PlayCircle className="size-4 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
-                    {lessons.length} video lessons
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Layers className="size-4 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
-                    {modules.length} structured modules
-                  </li>
-                  {course.requiresCertificate && (
-                    <li className="flex items-center gap-2">
-                      <Award className="size-4 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
-                      Certificate of completion
-                    </li>
-                  )}
-                </ul>
-              </div>
+              <CourseEnrollPanel
+                courseId={course.id}
+                userId={user?.id ?? null}
+                isEnrolled={isEnrolled}
+                percent={percent}
+                completedCount={completedCount}
+                lessonCount={lessons.length}
+                moduleCount={modules.length}
+                requiresCertificate={course.requiresCertificate}
+                firstLessonHref={
+                  firstIncompleteLesson ? `/lessons/${firstIncompleteLesson.id}` : undefined
+                }
+              />
 
               <div className="flex flex-wrap gap-1.5 border-t border-primary/15 pt-5">
                 {course.audience.map((a) => (

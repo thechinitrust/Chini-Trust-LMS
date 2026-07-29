@@ -47,6 +47,7 @@ create table public.lessons (
   youtube_video_id text not null,
   thumbnail_url text not null default '',
   duration_seconds int not null default 0 check (duration_seconds >= 0),
+  objectives text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
 

@@ -25,7 +25,7 @@ const READ_MODE_OPTIONS: { value: ReadAloudMode; label: string; icon: typeof Fil
 ];
 
 export default function AccessibilityPage() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const {
     dyslexiaFont,
     setDyslexiaFont,
@@ -60,7 +60,7 @@ export default function AccessibilityPage() {
             description="Reduce glare and eye strain with a low-light color theme."
             control={
               <Switch
-                checked={theme === "dark"}
+                checked={resolvedTheme === "dark"}
                 onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
                 aria-label="Toggle dark mode"
               />

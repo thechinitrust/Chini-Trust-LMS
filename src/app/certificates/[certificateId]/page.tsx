@@ -1,18 +1,17 @@
-"use client";
+import { notFound } from "next/navigation";
+import { Award } from "lucide-react";
 
-import { useParams, notFound } from "next/navigation";
-import { Award, Download, Printer, Share2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/server";
+import { getCertificateById } from "@/lib/data/certificates";
+import { CertificateActions } from "./certificate-actions";
 
-import { notify } from "@/lib/toast";
-import { mockCertificates } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
-import { EASE_OUT } from "@/components/motion/reveal";
+export default async function CertificatePage({ params }: { params: Promise<{ certificateId: string }> }) {
+  const { certificateId } = await params;
+  const supabase = await createClient();
 
-export default function CertificatePage() {
-  const params = useParams<{ certificateId: string }>();
-  const certificate = mockCertificates.find((c) => c.id === params.certificateId);
-
+  // RLS already restricts this to the owner or an admin -- a non-owner
+  // guessing a certificate id gets an empty result here, not an error.
+  const certificate = await getCertificateById(supabase, certificateId);
   if (!certificate) notFound();
 
   const issuedDate = new Date(certificate.issuedAt).toLocaleDateString(undefined, {
@@ -21,23 +20,10 @@ export default function CertificatePage() {
     day: "numeric",
   });
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      notify.success("Link copied", "Certificate link copied to your clipboard.");
-    } catch {
-      notify.info("Copy this link", url);
-    }
-  };
-
   return (
     <div className="container-page px-6 py-20 lg:px-12">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, ease: EASE_OUT }}
+        <div
           id="certificate-print-area"
           className="relative w-full overflow-hidden rounded-3xl border border-primary/20 bg-card p-10 text-center shadow-soft-lg sm:p-16"
         >
@@ -69,22 +55,9 @@ export default function CertificatePage() {
               Certificate ID: {certificate.id.toUpperCase()}
             </p>
           </div>
-        </motion.div>
-
-        <div className="flex flex-wrap justify-center gap-3 print:hidden">
-          <Button onClick={() => window.print()}>
-            <Download className="size-4" strokeWidth={1.5} aria-hidden="true" />
-            Download / Print
-          </Button>
-          <Button variant="outline" onClick={() => window.print()}>
-            <Printer className="size-4" strokeWidth={1.5} aria-hidden="true" />
-            Print
-          </Button>
-          <Button variant="outline" onClick={handleShare}>
-            <Share2 className="size-4" strokeWidth={1.5} aria-hidden="true" />
-            Share link
-          </Button>
         </div>
+
+        <CertificateActions />
       </div>
     </div>
   );

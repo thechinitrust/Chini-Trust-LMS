@@ -1,225 +1,141 @@
-# Supabase Integration Plan
+# Supabase Integration — What Was Actually Built
 
-This app currently runs entirely on mock data (`src/lib/mock-data.ts`) and a
-localStorage-backed mock session (`src/context/auth-context.tsx`). The UI,
-routes, and types were built to make swapping in Supabase a contained change
-rather than a rewrite. This is the checklist for that swap.
+This replaces the original pre-migration plan (the schema drafted there matched
+closely; the wiring approach ended up more structural than "swap the data
+source" — see below). The app is now fully wired to Supabase: no mock data,
+no localStorage-backed progress, real auth, real RLS, real RBAC.
 
-Videos are **out of scope** for this integration — they stay on YouTube.
-Only video *metadata* (`youtubeVideoId`, title, description, thumbnail,
-duration, order, published) is ever persisted. Do not add a Storage bucket
-or upload flow for video files.
+Videos remain **out of scope for storage** — only YouTube video metadata
+(`youtube_video_id`, thumbnail, duration) is ever persisted; no upload/Storage
+bucket for video files.
 
-## 1. Project setup
+## Architecture
 
-1. Create a Supabase project.
-2. Copy `.env.example` to `.env.local` and fill in:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` (server-only — used in server actions/route
-     handlers that need elevated access, e.g. issuing certificates; never
-     import it in a `"use client"` file)
-3. `npm install @supabase/supabase-js @supabase/ssr`
-4. Add `src/lib/supabase/client.ts` (browser client) and
-   `src/lib/supabase/server.ts` (server client using `@supabase/ssr`'s
-   `createServerClient`, wired into `src/middleware.ts` for session refresh).
+Every content-bearing page is an **async Server Component** (fetches via
+`src/lib/supabase/server.ts`) with small `"use client"` islands for
+interactive pieces (enroll button, video/progress tracking, quiz form, admin
+CRUD dialogs). Plain synchronous mock-data lookups couldn't become async in
+place, so this was a real restructuring, not just a data-source swap — see
+`src/app/courses/[courseId]/page.tsx` + `course-enroll-panel.tsx` for the
+pattern used everywhere.
 
-## 2. Schema
+The public course route (`/courses/[courseId]`) resolves by **slug**, not id
+(folder name kept for minimal diff).
 
-Every table below maps directly to an interface in `src/lib/types.ts` —
-column names are the snake_case version of the TS field names unless noted.
+## Schema
 
-```sql
-profiles (
-  id uuid primary key references auth.users(id),
-  full_name text not null,
-  email text not null,
-  role text not null default 'learner' check (role in ('learner','admin')),
-  avatar_url text,
-  created_at timestamptz not null default now()
-)
+`supabase/schemas/*.sql` (declarative, applied via `supabase db query
+--linked` — Docker isn't available locally for `db diff`/`db pull`, so schema
+changes are applied directly and then captured into
+`supabase/migrations/*.sql` by hand):
 
-courses (
-  id uuid primary key default gen_random_uuid(),
-  slug text unique not null,
-  title text not null,
-  summary text not null,
-  description text not null,
-  category text not null check (category in ('autism','adhd','dyslexia','workplace')),
-  audience text[] not null default '{}',
-  thumbnail_url text,
-  estimated_minutes int not null default 0,
-  level text not null default 'beginner',
-  objectives text[] not null default '{}',
-  requires_certificate boolean not null default true,
-  published boolean not null default false,
-  created_by uuid references profiles(id),
-  created_at timestamptz not null default now()
-)
+- `00_private.sql` — `private` schema, `is_admin()`, `set_updated_at()`,
+  `handle_new_user()` (creates a `profiles` row on signup, hardcodes
+  `role = 'learner'` always).
+- `10_profiles.sql` — `profiles` + role-escalation guard trigger (blocked
+  unless caller is already admin or the session isn't an end-user session at
+  all — the bootstrap escape hatch for direct SQL / service-role access).
+- `20_content.sql` — `courses`, `modules`, `lessons` (+ `objectives`
+  column), `resources`.
+- `30_learning.sql` — `enrollments`, `progress` (+
+  `guard_progress_enrollment` trigger enforcing `enrollment_id` really
+  belongs to the same user/course as the lesson).
+- `40_quizzes.sql` — `quizzes`, `quiz_questions`, `quiz_options` (admin-only
+  RLS — no learner-facing select policy at all), `quiz_attempts` (no
+  learner-facing insert policy). Two RPCs: `get_quiz_options` (strips
+  `is_correct`) and `submit_quiz_attempt` (server-side grading).
+- `50_certificates.sql` — `certificates` + private Storage bucket (bucket
+  unused so far — PDF rendering is still deferred, row-only issuance).
+- `60_accessibility.sql` — `accessibility_preferences` (schema exists;
+  `src/context/accessibility-context.tsx` still manages this client-side —
+  not wired to the table, out of scope for this pass).
+- `70_events.sql` — `events` (webinar/deadline/live-qa/announcement), RLS
+  mirrors `courses`.
+- `80_completion.sql` — `touch_enrollment_progress`, `evaluate_course_completion`
+  / `admin_recheck_course_completion` (shared logic in
+  `private.run_course_completion`), `evaluate_quiz_review`.
 
-modules (
-  id uuid primary key default gen_random_uuid(),
-  course_id uuid not null references courses(id) on delete cascade,
-  title text not null,
-  description text,
-  "order" int not null default 1
-)
+## Data-access layer
 
-lessons (
-  id uuid primary key default gen_random_uuid(),
-  module_id uuid not null references modules(id) on delete cascade,
-  course_id uuid not null references courses(id) on delete cascade,
-  title text not null,
-  description text,
-  notes text,
-  "order" int not null default 1,
-  published boolean not null default false,
-  youtube_video_id text not null,
-  thumbnail_url text,
-  duration_seconds int not null default 0
-)
+`src/lib/data/*.ts` — one module per entity (`courses`, `modules`, `lessons`,
+`resources`, `quizzes`, `enrollments`, `progress`, `certificates`, `events`,
+`users`, `admin-stats`). Every function takes a Supabase client as its first
+argument so the same function works from a Server Component or a `"use
+client"` mutation. Maps snake_case DB rows to the camelCase shapes in
+`src/lib/types.ts`.
 
-resources (
-  id uuid primary key default gen_random_uuid(),
-  title text not null,
-  summary text,
-  type text not null check (type in ('pdf','slides','worksheet','guide','link')),
-  category text not null,
-  file_url text not null,
-  course_id uuid references courses(id) on delete set null,
-  module_id uuid references modules(id) on delete set null,
-  lesson_id uuid references lessons(id) on delete set null,
-  featured boolean default false,
-  created_at timestamptz not null default now()
-)
+Quiz functions split into two families: admin (`getQuestionsForQuiz`, direct
+table CRUD — sees `is_correct`) and learner-facing (`getQuizQuestionsForLearner`,
+`submitQuizAttempt`, `getQuizReview`, `getLatestPassingAttempt` — all backed
+by RPCs, never see `is_correct` before submission).
 
-enrollments (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references profiles(id) on delete cascade,
-  course_id uuid not null references courses(id) on delete cascade,
-  status text not null default 'enrolled' check (status in ('enrolled','in-progress','completed')),
-  enrolled_at timestamptz not null default now(),
-  completed_at timestamptz,
-  unique (user_id, course_id)
-)
+## Real-time features
 
-progress (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references profiles(id) on delete cascade,
-  lesson_id uuid not null references lessons(id) on delete cascade,
-  enrollment_id uuid not null references enrollments(id) on delete cascade,
-  watched_seconds int not null default 0,
-  completed boolean not null default false,
-  last_watched_at timestamptz not null default now(),
-  unique (user_id, lesson_id)
-)
+- **Enrollment**: `course-enroll-panel.tsx`, real insert, one row per
+  `(user, course)`.
+- **Lesson progress**: `youtube-embed-player.tsx` loads the real YouTube
+  IFrame Player API (not a bare iframe) — resumes from last position, reports
+  progress every ~10s, auto-completes at ~90% watched.
+  `lessons/[lessonId]/lesson-player.tsx` persists writes and calls the
+  completion RPCs. Manual "Mark complete" still available as an
+  accessibility-friendly override. A learner deep-linking to a lesson with no
+  enrollment yet is auto-enrolled server-side.
+- **Quizzes**: `quizzes/[quizId]/quiz-taker.tsx` — options never carry
+  `is_correct` pre-submission; grading is server-side via
+  `submitQuizAttempt`; post-submit review uses `getQuizReview` (scoped to the
+  caller's own attempt only). Shows a "you already passed this" banner via
+  `getLatestPassingAttempt`.
+- **Certificates**: no dedicated issuance UI — a pure side effect of
+  `evaluate_course_completion`, triggered from the lesson-completion and
+  quiz-pass paths. Admin can also issue/revoke manually and re-check
+  eligibility for a specific learner via `admin_recheck_course_completion`.
+- **Dashboard**: real day-streak (consecutive UTC calendar days with a
+  `progress` write), real "Upcoming" widget (`events`), everything else
+  swapped from mock to real queries.
 
-quizzes (
-  id uuid primary key default gen_random_uuid(),
-  module_id uuid not null references modules(id) on delete cascade,
-  course_id uuid not null references courses(id) on delete cascade,
-  title text not null,
-  description text,
-  pass_threshold int not null default 70
-)
+## Admin panel
 
-quiz_questions (
-  id uuid primary key default gen_random_uuid(),
-  quiz_id uuid not null references quizzes(id) on delete cascade,
-  question text not null,
-  type text not null default 'single-choice',
-  "order" int not null default 1
-)
+All 8 original sections wired to real CRUD (courses/modules/lessons/resources/
+quizzes/users/certificates/overview) plus a new **Events** section. Notable
+additions beyond a straight data-source swap:
 
-quiz_options (
-  id uuid primary key default gen_random_uuid(),
-  question_id uuid not null references quiz_questions(id) on delete cascade,
-  text text not null,
-  is_correct boolean not null default false
-)
+- **Quiz question/option editor** (`/admin/quizzes/[quizId]`) — didn't exist
+  before in any form; nested accordion editor for questions + options with
+  an `is_correct` toggle.
+- **User invite/delete** (`src/app/api/admin/invite-user/route.ts`,
+  `delete-user/route.ts`) — Route Handlers, not client calls or Server
+  Actions, because creating/deleting a real `auth.users` row needs the
+  `service_role` key (`src/lib/supabase/admin.ts`, server-only), which can
+  never reach the browser. Both re-verify the caller is an admin from their
+  own session before touching the service-role client. Role
+  promote/demote doesn't need the service role — the existing
+  `guard_profile_role_change` trigger already permits an admin caller.
+- **Overview stats/charts** — real aggregate queries
+  (`src/lib/data/admin-stats.ts`), replacing the previous hardcoded/fabricated
+  numbers.
 
-quiz_attempts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references profiles(id) on delete cascade,
-  quiz_id uuid not null references quizzes(id) on delete cascade,
-  score int not null,
-  passed boolean not null,
-  answers jsonb not null default '{}',
-  attempted_at timestamptz not null default now()
-)
+## Seeding
 
-certificates (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references profiles(id) on delete cascade,
-  course_id uuid not null references courses(id) on delete cascade,
-  learner_name text not null,
-  course_title text not null,
-  issued_at timestamptz not null default now(),
-  certificate_url text
-)
+`scripts/seed-mock-data.ts` + `scripts/seed-data.ts` (frozen sample content,
+independent of the app's `src/lib/mock-data.ts`, which now only holds the
+About-page team roster). Run via `npm run seed`. Safe to re-run — deletes by
+known slug/title before inserting. Useful for populating a fresh or staging
+Supabase project with realistic demo content; also exercises
+`evaluate_course_completion` as an end-to-end smoke test by calling it as the
+seeded learner instead of hand-inserting the certificate row.
 
-accessibility_preferences (
-  user_id uuid primary key references profiles(id) on delete cascade,
-  dark_mode boolean default false,
-  dyslexia_font boolean default false,
-  text_scale text default 'default',
-  focus_mode boolean default false,
-  read_aloud boolean default false
-)
-```
+## Dev-only Quick Login
 
-## 3. Row Level Security
+`src/app/login/page.tsx`, gated behind `NEXT_PUBLIC_ENABLE_QUICK_LOGIN` (see
+`.env.example`). Logs into the two seeded accounts
+(`admin@neurobridge.com` / `user@neurobridge.com`). Set the flag to `false`
+(or delete the block) before shipping to production.
 
-Enable RLS on every table above, then:
+## Known gaps / explicitly deferred
 
-- `profiles`: user can `select`/`update` their own row (`id = auth.uid()`);
-  admins can `select` all (`exists (select 1 from profiles p where p.id =
-  auth.uid() and p.role = 'admin')`).
-- `courses`, `modules`, `lessons`, `resources`, `quizzes`, `quiz_questions`,
-  `quiz_options`: public `select` where the parent course's `published =
-  true`; `insert`/`update`/`delete` restricted to admins.
-- `enrollments`, `progress`, `quiz_attempts`, `certificates`,
-  `accessibility_preferences`: user can `select`/`insert`/`update` only rows
-  where `user_id = auth.uid()`; admins can `select` all.
-
-## 4. Wiring the app
-
-Replace internals only — keep exported function signatures the same so
-pages/components don't need to change:
-
-1. **`src/context/auth-context.tsx`** — replace the mock `login`/`register`/
-   `logout` with `supabase.auth.signInWithPassword` /
-   `supabase.auth.signUp` / `supabase.auth.signOut`, and hydrate `user` from
-   `supabase.auth.onAuthStateChange` + a `profiles` row fetch instead of
-   `localStorage`.
-2. **`src/lib/mock-data.ts`** — replace each exported function
-   (`getCourseBySlug`, `getModulesForCourse`, `getEnrollmentsForUser`, …)
-   with an equivalent Supabase query. Since every page imports these by
-   name, most pages need zero changes. Convert the ones on the critical
-   path (course catalogue, course detail, lesson) to server components
-   fetching via `src/lib/supabase/server.ts` where it makes sense for SEO.
-3. **`src/hooks/use-local-progress.ts`** — replace with direct
-   `progress`/`quiz_attempts` table writes; delete the localStorage
-   fallback once done.
-4. **`src/app/admin/**`** — replace local `useState` CRUD with Supabase
-   `insert`/`update`/`delete` calls, and re-check `role = 'admin'` in a
-   server component or middleware, not just client-side (`RequireAuth` is a
-   UX convenience only — see its comment).
-5. **`middleware.ts`** (new) — use `@supabase/ssr` to refresh the session
-   cookie on every request, and redirect unauthenticated requests away from
-   `/dashboard` and `/admin/*` before the page even renders.
-6. **Certificates** — on quiz pass / course completion, call a Supabase Edge
-   Function (or Next.js route handler using the service role key) that
-   renders a PDF (`@react-pdf/renderer` or similar) and uploads it to a
-   `certificates` Storage bucket, then writes the `certificates` row.
-7. **AI NeuroGuide** — replace `src/lib/mock-ai.ts`'s `getMockAIResponse`
-   with a call to a Supabase Edge Function that proxies to an LLM.
-
-## 5. What stays exactly as-is
-
-- `src/lib/types.ts` — already matches the schema above field-for-field.
-- Every component under `src/components/**` — they're already data-shape
-  agnostic (props in, JSX out).
-- Route structure under `src/app/**`.
-- The YouTube embed component (`youtube-embed-player.tsx`) and the rule
-  that only `youtubeVideoId` + metadata are ever stored.
+- Certificate **PDF rendering** — row + Storage bucket exist, no renderer yet.
+- `accessibility_preferences` table isn't wired to
+  `accessibility-context.tsx` yet.
+- Real SMTP for Supabase Auth emails (currently on the shared low-rate-limit
+  test sender) — needed before enabling email confirmation for real public
+  signups at scale.

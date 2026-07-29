@@ -37,7 +37,7 @@ export function LearningCard({ course, progress, lessonCount, moduleCount }: Lea
 
   return (
     <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="h-full">
-      <Link href={`/courses/${course.id}`} className="group block h-full">
+      <Link href={`/courses/${course.slug}`} className="group block h-full">
         <Card interactive className="flex h-full flex-col overflow-hidden">
           {/* Thumbnail */}
           <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">

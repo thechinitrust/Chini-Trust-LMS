@@ -33,6 +33,16 @@ export async function listProfiles(client: SupabaseClient): Promise<Profile[]> {
   return (data as ProfileRow[]).map(mapProfile);
 }
 
+export async function getProfileById(client: SupabaseClient, id: string): Promise<Profile | undefined> {
+  const { data, error } = await client
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapProfile(data as ProfileRow) : undefined;
+}
+
 export async function getProfileByEmail(client: SupabaseClient, email: string): Promise<Profile | undefined> {
   const { data, error } = await client
     .from("profiles")

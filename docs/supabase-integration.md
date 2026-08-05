@@ -124,13 +124,6 @@ Supabase project with realistic demo content; also exercises
 `evaluate_course_completion` as an end-to-end smoke test by calling it as the
 seeded learner instead of hand-inserting the certificate row.
 
-## Dev-only Quick Login
-
-`src/app/login/page.tsx`, gated behind `NEXT_PUBLIC_ENABLE_QUICK_LOGIN` (see
-`.env.example`). Logs into the two seeded accounts
-(`admin@neurobridge.com` / `user@neurobridge.com`). Set the flag to `false`
-(or delete the block) before shipping to production.
-
 ## Known gaps / explicitly deferred
 
 - Certificate **PDF rendering** — row + Storage bucket exist, no renderer yet.

@@ -34,14 +34,15 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const userId = user?.id;
 
   // A learner deep-linking straight to a lesson without having visited the
   // course page yet still needs an enrollment row for progress writes to be
   // valid (the guard_progress_enrollment trigger requires it) -- auto-enroll
   // here rather than erroring.
-  let enrollment = user ? await getEnrollment(supabase, user.id, course.id) : undefined;
-  if (user && !enrollment) {
-    enrollment = await enrollInCourse(supabase, user.id, course.id);
+  let enrollment = userId ? await getEnrollment(supabase, userId, course.id) : undefined;
+  if (userId && !enrollment) {
+    enrollment = await enrollInCourse(supabase, userId, course.id);
   }
 
   const [modules, courseLessons, nextLesson, prevLesson, resources, moduleQuiz, lessonProgress, progressRows] =
@@ -52,14 +53,14 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
       getPreviousLesson(supabase, lesson.id),
       getResourcesForLesson(supabase, lesson.id),
       getQuizForModule(supabase, courseModule.id),
-      user ? getProgressForLesson(supabase, user.id, lesson.id) : Promise.resolve(undefined),
-      user ? getProgressForUser(supabase, user.id) : Promise.resolve([]),
+      userId ? getProgressForLesson(supabase, userId, lesson.id) : Promise.resolve(undefined),
+      userId ? getProgressForUser(supabase, userId) : Promise.resolve([]),
     ]);
   const lessonsByModule = Object.fromEntries(
     await Promise.all(modules.map(async (m) => [m.id, await getLessonsForModule(supabase, m.id)] as const))
   );
   const completedLessonIds = new Set(progressRows.filter((p) => p.completed).map((p) => p.lessonId));
-  const coursePercent = user ? await getCourseCompletionPercent(supabase, user.id, course.id) : 0;
+  const coursePercent = userId ? await getCourseCompletionPercent(supabase, userId, course.id) : 0;
 
   const lessonIndex = courseLessons.findIndex((l) => l.id === lesson.id);
   const isLastInModule = (lessonsByModule[courseModule.id] ?? []).at(-1)?.id === lesson.id;
@@ -92,7 +93,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
             lessonPosition={`Lesson ${lessonIndex + 1} of ${courseLessons.length} · ${formatDuration(lesson.video.durationSeconds)}`}
             youtubeVideoId={lesson.video.youtubeVideoId}
             durationSeconds={lesson.video.durationSeconds}
-            userId={user?.id ?? null}
+            userId={userId ?? null}
             enrollmentId={enrollment?.id ?? null}
             initialWatchedSeconds={lessonProgress?.watchedSeconds ?? 0}
             initialCompleted={lessonProgress?.completed ?? false}

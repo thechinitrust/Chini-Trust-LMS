@@ -31,12 +31,13 @@ export default async function ModulePage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const userId = user?.id;
 
   const [lessons, quiz, completedLessonIds] = await Promise.all([
     getLessonsForModule(supabase, courseModule.id),
     getQuizForModule(supabase, courseModule.id),
-    user
-      ? getProgressForUser(supabase, user.id).then(
+    userId
+      ? getProgressForUser(supabase, userId).then(
           (rows) => new Set(rows.filter((p) => p.completed).map((p) => p.lessonId))
         )
       : Promise.resolve(new Set<string>()),

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { BookOpen, CheckCircle2, Award, History, Library, Calendar, Zap, ArrowRight, Flame } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
-import { listProfiles } from "@/lib/data/users";
+import { getProfileById } from "@/lib/data/users";
 import { listCourses } from "@/lib/data/courses";
 import { getEnrollmentsForUser } from "@/lib/data/enrollments";
 import { getCertificatesForUser } from "@/lib/data/certificates";
@@ -25,21 +25,21 @@ const EVENT_MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
-    data: { user: authUser },
+    data: { user },
   } = await supabase.auth.getUser();
-  if (!authUser) redirect("/login");
+  if (!user) redirect("/login");
+  const authUserId = user.id;
 
-  const profiles = await listProfiles(supabase);
-  const profile = profiles.find((p) => p.id === authUser.id);
-  const fullName = profile?.fullName ?? "there";
+  const profile = await getProfileById(supabase, authUserId).catch(() => undefined);
+  const fullName = profile?.fullName || (user.user_metadata?.full_name as string | undefined) || user.email?.split("@")[0] || "there";
 
   const [enrollments, certificates, progressRows, dayStreak, courses, upcomingEvents] = await Promise.all([
-    getEnrollmentsForUser(supabase, authUser.id),
-    getCertificatesForUser(supabase, authUser.id),
-    getProgressForUser(supabase, authUser.id),
-    getDayStreak(supabase, authUser.id),
-    listCourses(supabase),
-    getUpcomingEvents(supabase, 2),
+    getEnrollmentsForUser(supabase, authUserId).catch(() => []),
+    getCertificatesForUser(supabase, authUserId).catch(() => []),
+    getProgressForUser(supabase, authUserId).catch(() => []),
+    getDayStreak(supabase, authUserId).catch(() => 0),
+    listCourses(supabase).catch(() => []),
+    getUpcomingEvents(supabase, 2).catch(() => []),
   ]);
 
   const inProgress = enrollments.filter((e) => e.status !== "completed");
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   const progressPercentByCourse: Record<string, number> = {};
   await Promise.all(
     enrollments.map(async (e) => {
-      progressPercentByCourse[e.courseId] = await getCourseCompletionPercent(supabase, authUser.id, e.courseId);
+      progressPercentByCourse[e.courseId] = await getCourseCompletionPercent(supabase, authUserId, e.courseId);
     })
   );
   const avgProgress =
@@ -219,21 +219,25 @@ export default async function DashboardPage() {
                 <CardTitle className="flex items-center gap-2 text-lg font-serif">
                   <Award className="size-5 text-accent" /> Certificates
                 </CardTitle>
-                <Link href="/certificates" className="text-xs font-medium text-primary hover:underline">
-                  View all
-                </Link>
+                <Badge variant="outline" className="text-xs font-normal">
+                  {certificates.length} {certificates.length === 1 ? "earned" : "earned"}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               {certificates.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No certificates earned yet.</p>
               ) : (
-                <div className="space-y-4">
-                  {certificates.slice(0, 2).map((cert) => (
-                    <div key={cert.id} className="flex flex-col gap-2 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-                      <p className="font-semibold text-sm line-clamp-1">{cert.courseTitle}</p>
+                <div className="space-y-3">
+                  {certificates.map((cert) => (
+                    <Link
+                      key={cert.id}
+                      href={`/certificates/${cert.id}`}
+                      className="group flex flex-col gap-1 p-3 rounded-xl border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
+                    >
+                      <p className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">{cert.courseTitle}</p>
                       <p className="text-xs text-muted-foreground">Issued: {new Date(cert.issuedAt).toLocaleDateString()}</p>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

@@ -43,10 +43,15 @@ export function Navbar() {
 
   React.useEffect(() => setMounted(true), []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     setMobileOpen(false);
-    router.push("/");
+    // Await signOut so the Supabase cookies are actually cleared before we
+    // navigate -- pushing immediately (fire-and-forget) risked landing on
+    // /login while the old session cookie was still readable by middleware,
+    // which is its own source of "logged out but not really" flakiness.
+    await logout();
+    router.replace("/login");
+    router.refresh();
   };
 
   return (

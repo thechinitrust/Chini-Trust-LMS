@@ -40,6 +40,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const userId = user?.id;
 
   const [modules, lessons] = await Promise.all([
     getModulesForCourse(supabase, course.id),
@@ -49,11 +50,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
     await Promise.all(modules.map(async (m) => [m.id, await getLessonsForModule(supabase, m.id)] as const))
   );
 
-  const enrollment = user ? await getEnrollment(supabase, user.id, course.id) : undefined;
+  const enrollment = userId ? await getEnrollment(supabase, userId, course.id) : undefined;
   const isEnrolled = Boolean(enrollment);
-  const percent = user && isEnrolled ? await getCourseCompletionPercent(supabase, user.id, course.id) : 0;
-  const completedLessonIds = user
-    ? new Set((await getProgressForUser(supabase, user.id)).filter((p) => p.completed).map((p) => p.lessonId))
+  const percent = userId && isEnrolled ? await getCourseCompletionPercent(supabase, userId, course.id) : 0;
+  const completedLessonIds = userId
+    ? new Set((await getProgressForUser(supabase, userId)).filter((p) => p.completed).map((p) => p.lessonId))
     : new Set<string>();
 
   const introVideoId = course.previewVideoId ?? lessons[0]?.video.youtubeVideoId;
@@ -155,7 +156,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
               <h2 className="font-serif text-2xl text-foreground">Course content</h2>
               <p className="text-sm text-muted-foreground">
                 {modules.length} modules &middot; {lessons.length} lessons
-                {user && isEnrolled && ` · ${completedCount} completed`}
+                {userId && isEnrolled && ` · ${completedCount} completed`}
               </p>
             </div>
             <div className="mt-5">
@@ -174,7 +175,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
             <CardContent className="space-y-5 p-6">
               <CourseEnrollPanel
                 courseId={course.id}
-                userId={user?.id ?? null}
+                userId={userId ?? null}
                 isEnrolled={isEnrolled}
                 percent={percent}
                 completedCount={completedCount}

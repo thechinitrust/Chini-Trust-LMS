@@ -13,13 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { user, register, isLoading } = useAuth();
   const router = useRouter();
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [confirmationSentTo, setConfirmationSentTo] = React.useState<string | null>(null);
+  // See /login for why this guard exists -- prevents the effect below from
+  // replaying handleSubmit's own redirect a second time once `user` state
+  // catches up.
+  const hasRedirectedRef = React.useRef(false);
+
+  // Same reasoning as /login: an already-authenticated visitor shouldn't see
+  // the signup form. Middleware covers this server-side too.
+  React.useEffect(() => {
+    if (hasRedirectedRef.current || isLoading || !user) return;
+    hasRedirectedRef.current = true;
+    router.replace(user.role === "admin" ? "/admin" : "/dashboard");
+    router.refresh();
+  }, [isLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +44,19 @@ export default function RegisterPage() {
         return;
       }
       notify.success("Account created", `Welcome to NeuroBridge, ${profile?.fullName ?? "there"}.`);
-      router.push("/dashboard");
+      hasRedirectedRef.current = true;
+      router.replace(profile?.role === "admin" ? "/admin" : "/dashboard");
+      router.refresh();
     } catch (error) {
       notify.error("Couldn't create account", error instanceof Error ? error.message : undefined);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!isLoading && user) {
+    return null;
+  }
 
   if (confirmationSentTo) {
     return (

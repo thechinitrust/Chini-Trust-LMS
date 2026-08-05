@@ -14,12 +14,13 @@ export default async function QuizPage({ params }: { params: Promise<{ quizId: s
   const quiz = await getQuizById(supabase, quizId);
   if (!quiz) notFound();
 
-  const [course, questions, { data: { user } }] = await Promise.all([
+  const [course, questions, { data: userData }] = await Promise.all([
     getCourseById(supabase, quiz.courseId),
     getQuizQuestionsForLearner(supabase, quiz.id),
     supabase.auth.getUser(),
   ]);
-  const alreadyPassedAttempt = user ? await getLatestPassingAttempt(supabase, user.id, quiz.id) : undefined;
+  const userId = userData?.user?.id;
+  const alreadyPassedAttempt = userId ? await getLatestPassingAttempt(supabase, userId, quiz.id) : undefined;
 
   return (
     <div className="container-page max-w-3xl px-6 py-16 lg:px-12">
@@ -38,7 +39,7 @@ export default async function QuizPage({ params }: { params: Promise<{ quizId: s
       <QuizTaker
         quizId={quiz.id}
         passThreshold={quiz.passThreshold}
-        isLoggedIn={Boolean(user)}
+        isLoggedIn={Boolean(userId)}
         requiresCertificate={course?.requiresCertificate ?? false}
         questions={questions}
         alreadyPassed={

@@ -8,9 +8,8 @@ import { LearnClient, type LearnCourseSummary } from "./learn-client";
 export default async function LearnPage() {
   const supabase = await createClient();
 
-  const [courses, {
-    data: { user },
-  }] = await Promise.all([listCourses(supabase), supabase.auth.getUser()]);
+  const [courses, { data: userData }] = await Promise.all([listCourses(supabase), supabase.auth.getUser()]);
+  const userId = userData?.user?.id;
   const published = courses.filter((c) => c.published);
 
   const summaries: LearnCourseSummary[] = await Promise.all(
@@ -18,7 +17,7 @@ export default async function LearnPage() {
       const [modules, lessons, progress] = await Promise.all([
         getModulesForCourse(supabase, course.id),
         getLessonsForCourse(supabase, course.id),
-        user ? getCourseCompletionPercent(supabase, user.id, course.id) : Promise.resolve(undefined),
+        userId ? getCourseCompletionPercent(supabase, userId, course.id) : Promise.resolve(undefined),
       ]);
       return { course, progress, moduleCount: modules.length, lessonCount: lessons.length };
     })

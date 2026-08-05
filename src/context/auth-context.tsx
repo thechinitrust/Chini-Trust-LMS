@@ -57,6 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = React.useMemo(() => createClient(), []);
   const [user, setUser] = React.useState<Profile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  // Mirrors `user` synchronously (state updates are async/batched) so
+  // onAuthStateChange can tell "this is the profile we already have" from
+  // "this is a different user" without a stale closure over `user`.
+  const userRef = React.useRef<Profile | null>(null);
 
   const loadProfile = React.useCallback(
     async (userId: string): Promise<Profile | null> => {
@@ -67,11 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error || !data) {
+        userRef.current = null;
         setUser(null);
         return null;
       }
 
       const profile = toProfile(data);
+      userRef.current = profile;
       setUser(profile);
       return profile;
     },
@@ -94,8 +100,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        // `login()`/`register()` already fetch and set the profile
+        // themselves (they need it synchronously, to pick a redirect
+        // target) -- this listener also fires for that same sign-in a
+        // moment later. Without this check every login/register did the
+        // profile lookup twice, and every silent background token refresh
+        // (roughly hourly, for as long as the tab stays open) did it again
+        // for no reason. Only fetch when the signed-in user is actually
+        // different from what's already loaded.
+        if (userRef.current?.id === session.user.id) return;
         void loadProfile(session.user.id);
       } else {
+        userRef.current = null;
         setUser(null);
       }
     });
@@ -148,6 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = React.useCallback(async () => {
     await supabase.auth.signOut();
+    userRef.current = null;
     setUser(null);
   }, [supabase]);
 

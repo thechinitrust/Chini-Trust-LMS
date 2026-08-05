@@ -9,8 +9,9 @@ export default async function AdminUsersPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const userId = user?.id;
+  if (!userId) redirect("/login");
 
   const users = await listProfiles(supabase);
-  return <UsersTable users={users} currentUserId={user.id} />;
+  return <UsersTable users={users} currentUserId={userId} />;
 }

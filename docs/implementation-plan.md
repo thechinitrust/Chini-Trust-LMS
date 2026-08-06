@@ -1,4 +1,4 @@
-# NeuroBridge AI — Implementation Plan
+# CHINI Learn — Implementation Plan
 
 Companion to [vision.md](vision.md). Sequenced so the UI is built first
 against mock data, and Supabase is wired in as the final integration phase —

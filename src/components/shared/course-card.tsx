@@ -39,7 +39,7 @@ export function CourseCard({ course, progress }: CourseCardProps) {
             {CATEGORY_LABEL[course.category]}
           </Badge>
         </div>
-        <CardContent className="flex flex-1 flex-col gap-3 p-6">
+        <CardContent className="flex flex-1 flex-col gap-3 p-6 sm:p-6">
           <h3 className="font-semibold leading-snug text-foreground">{course.title}</h3>
           <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">{course.summary}</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

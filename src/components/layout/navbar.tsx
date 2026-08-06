@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Moon, Sun, LayoutDashboard, ShieldCheck, LogOut, Brain } from "lucide-react";
+import { Menu, Moon, Sun, LayoutDashboard, ShieldCheck, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -24,7 +25,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const NAV_LINKS = [
   { href: "/learn", label: "Learn" },
   { href: "/resources", label: "Resources" },
-  { href: "/ai-neuroguide", label: "NeuroGuide" },
   { href: "/accessibility", label: "Accessibility" },
   { href: "/about", label: "About" },
 ];
@@ -61,10 +61,10 @@ export function Navbar() {
     >
       <div className="container-page flex h-20 items-center justify-between gap-4 px-6 lg:px-12">
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-ink text-primary-foreground shadow-soft transition-transform duration-500 group-hover:scale-105">
-            <Brain className="size-5" strokeWidth={1.5} aria-hidden="true" />
+          <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-soft transition-transform duration-500 group-hover:scale-105">
+            <Image src="/logo.png" alt="" fill className="object-cover" sizes="40px" priority />
           </span>
-          <span className="font-serif text-xl tracking-tight text-foreground">NeuroBridge</span>
+          <span className="font-serif text-xl tracking-tight text-foreground">CHINI Learn</span>
         </Link>
 
         <nav className="relative hidden items-center gap-1 lg:flex" aria-label="Main navigation">

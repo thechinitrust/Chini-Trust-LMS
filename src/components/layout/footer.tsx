@@ -1,5 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Brain } from "lucide-react";
 
 const COLUMNS = [
   {
@@ -7,7 +7,6 @@ const COLUMNS = [
     links: [
       { href: "/learn", label: "Learn" },
       { href: "/resources", label: "Resources" },
-      { href: "/ai-neuroguide", label: "NeuroGuide" },
       { href: "/accessibility", label: "Accessibility" },
     ],
   },
@@ -27,10 +26,10 @@ export function Footer() {
       <div className="container-page relative grid gap-12 px-6 py-20 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
         <div className="sm:col-span-2">
           <Link href="/" className="group flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-ink text-primary-foreground shadow-soft transition-transform duration-500 group-hover:scale-105">
-              <Brain className="size-4.5" strokeWidth={1.5} aria-hidden="true" />
+            <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-500 group-hover:scale-105">
+              <Image src="/logo-dark.png" alt="" fill className="object-cover" sizes="36px" />
             </span>
-            <span className="font-serif text-lg tracking-tight text-ink-foreground">NeuroBridge</span>
+            <span className="font-serif text-lg tracking-tight text-ink-foreground">CHINI Learn</span>
           </Link>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-muted-foreground">
             An accessibility-first platform from The Chini Trust for neurodiversity awareness,
@@ -58,7 +57,7 @@ export function Footer() {
       <div className="relative border-t border-ink-border py-6">
         <div className="container-page flex flex-col items-center justify-between gap-2 px-6 text-xs text-ink-muted-foreground sm:flex-row lg:px-12">
           <p>&copy; {new Date().getFullYear()} The Chini Trust. All rights reserved.</p>
-          <p>NeuroBridge is an independent platform of The Chini Trust.</p>
+          <p>CHINI Learn is an independent platform of The Chini Trust.</p>
         </div>
       </div>
     </footer>

@@ -2,7 +2,7 @@
  * One-off seed: migrates the frozen sample content in scripts/seed-data.ts
  * into the real Supabase project, re-pointing the sample learner's history
  * (enrollments/progress/quiz attempt/certificate) onto the real
- * `user@neurobridge.com` account. Useful for populating a fresh/staging
+ * `user@chinilearn.org` account. Useful for populating a fresh/staging
  * Supabase project with realistic demo content.
  *
  * Run with: npm run seed
@@ -26,8 +26,8 @@ import {
   CURRENT_LEARNER_ID,
 } from "./seed-data";
 
-const LEARNER_EMAIL = "user@neurobridge.com";
-const LEARNER_PASSWORD = "NeuroBridge@2026";
+const LEARNER_EMAIL = "user@chinilearn.org";
+const LEARNER_PASSWORD = "ChiniLearn@2026";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;

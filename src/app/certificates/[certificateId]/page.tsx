@@ -49,7 +49,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ ce
             <p className="mt-7 text-sm text-muted-foreground">Issued on {issuedDate}</p>
             <div className="mx-auto mt-8 h-px w-24 bg-border" />
             <p className="mt-6 text-xs tracking-widest text-muted-foreground uppercase">
-              NeuroBridge &middot; The Chini Trust
+              CHINI Learn &middot; The Chini Trust
             </p>
             <p className="mt-1 font-mono text-[11px] text-muted-foreground/70">
               Certificate ID: {certificate.id.toUpperCase()}

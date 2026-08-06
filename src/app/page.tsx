@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Library, MessagesSquare, Accessibility, ArrowRight, Brain } from "lucide-react";
+import { BookOpen, Library, Accessibility, ArrowRight, Brain } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { HeroSection } from "@/components/shared/hero-section";
@@ -28,12 +28,6 @@ const FEATURES = [
     title: "Resource Library",
     description: "Downloadable guides and toolkits for parents, teachers, students, and employers.",
     href: "/resources",
-  },
-  {
-    icon: MessagesSquare,
-    title: "NeuroGuide",
-    description: "A supportive assistant for quick, practical guidance whenever you need it.",
-    href: "/ai-neuroguide",
   },
   {
     icon: Accessibility,
@@ -67,14 +61,14 @@ export default async function HomePage() {
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium tracking-widest text-primary-text uppercase">What&apos;s inside</p>
           <h2 className="mt-4 font-serif text-4xl tracking-tight text-foreground sm:text-5xl">
-            <SplitReveal text="One platform, four ways to grow" />
+            <SplitReveal text="One platform, three ways to grow" />
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            NeuroBridge brings structured learning, curated resources, guided support, and
+            CHINI Learn brings structured learning, curated resources, and
             accessibility tools together in one accessible, evidence-based platform.
           </p>
         </Reveal>
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
             <TiltCard key={f.title}>
               <FeatureCard
@@ -150,7 +144,7 @@ export default async function HomePage() {
           <Reveal className="mx-auto max-w-2xl text-center" variant="blur">
             <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Built for everyone</p>
             <h2 className="mt-3 font-serif text-3xl text-foreground sm:text-4xl">
-              <SplitReveal text="Who NeuroBridge is for" />
+              <SplitReveal text="Who CHINI Learn is for" />
             </h2>
           </Reveal>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

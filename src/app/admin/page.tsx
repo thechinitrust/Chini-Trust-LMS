@@ -54,7 +54,7 @@ export default async function AdminOverviewPage() {
         <div>
           <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Analytics</p>
           <h1 className="mt-2 font-serif text-3xl tracking-tight text-foreground">Admin Dashboard</h1>
-          <p className="mt-2 text-muted-foreground">A snapshot of NeuroBridge performance, content, and learners.</p>
+          <p className="mt-2 text-muted-foreground">A snapshot of CHINI Learn performance, content, and learners.</p>
         </div>
         <div className="flex gap-2">
           {QUICK_LINKS.slice(0, 2).map((link) => (

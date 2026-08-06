@@ -1,5 +1,5 @@
 /**
- * Domain types for NeuroBridge.
+ * Domain types for CHINI Learn.
  *
  * Shaped to map 1:1 onto the future Supabase/Postgres schema (see
  * docs/supabase-schema.md once Supabase is wired in). Every entity here is

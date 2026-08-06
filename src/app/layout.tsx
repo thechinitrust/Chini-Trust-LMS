@@ -29,11 +29,20 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "NeuroBridge | The Chini Trust",
-    template: "%s | NeuroBridge",
+    default: "CHINI Learn | The Chini Trust",
+    template: "%s | CHINI Learn",
   },
   description:
     "An accessibility-first neurodiversity platform from The Chini Trust: structured learning, a practical resource library, and inclusive support for students, parents, teachers, and employers.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

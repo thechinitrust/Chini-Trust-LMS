@@ -1,4 +1,4 @@
-# NeuroBridge
+# CHINI Learn
 
 An accessibility-first platform for The Chini Trust: a neurodiversity
 learning platform (LMS), resource library, and guidance assistant for
@@ -19,7 +19,7 @@ for that plan.
 - Next.js 15 (App Router) + TypeScript
 - Tailwind CSS + shadcn/ui (New York style) + lucide-react icons
 - next-themes for dark mode
-- Mock authentication + mock AI chat, both clearly marked `TODO(supabase)`
+- Mock authentication, clearly marked `TODO(supabase)`
   in code for where real integrations go
 
 ## Getting started
@@ -44,7 +44,6 @@ src/
     ui/                 shadcn/ui primitives (button, card, dialog, ...)
     layout/              navbar, footer, admin sidebar
     shared/               course/resource/lesson cards, quiz UI, empty/error states
-    chat/                 AI NeuroGuide chat UI
     accessibility/        accessibility control row
     admin/                admin table + form building blocks
     auth/                 auth card, RequireAuth route guard
@@ -53,7 +52,6 @@ src/
   lib/
     types.ts            domain types, shaped to match the future Supabase schema
     mock-data.ts         sample courses/modules/lessons/quizzes/etc. + lookup helpers
-    mock-ai.ts            canned AI NeuroGuide responses
     youtube.ts             YouTube ID/URL parsing + duration formatting
     toast.ts               sonner wrapper
 docs/
@@ -64,7 +62,7 @@ docs/
 
 ### Routes
 
-Public: `/`, `/learn`, `/resources`, `/ai-neuroguide`, `/accessibility`,
+Public: `/`, `/learn`, `/resources`, `/accessibility`,
 `/about`, `/login`, `/register`, `/forgot-password`.
 
 Learner (mock-auth gated): `/dashboard`, `/courses/[courseId]`,
@@ -90,7 +88,6 @@ Videos" screen accepts a pasted YouTube ID or URL — never a file.
   `src/lib/mock-data.ts`, static in-memory arrays.
 - **Progress & quiz attempts** — `src/hooks/use-local-progress.ts`, overlaid
   on the mock data via localStorage so the demo feels real in a session.
-- **AI NeuroGuide** — `src/lib/mock-ai.ts`, keyword-matched canned replies.
 - **Admin CRUD** — local React state seeded from the mock arrays; changes
   don't persist across a reload.
 

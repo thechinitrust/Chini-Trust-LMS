@@ -47,7 +47,7 @@ export default function AccessibilityPage() {
           <SplitReveal text="Accessibility" />
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-          NeuroBridge is built accessibility-first. These tools adjust the whole platform to fit
+          CHINI Learn is built accessibility-first. These tools adjust the whole platform to fit
           how you read, focus, and process information best — and your preferences are remembered.
         </p>
       </Reveal>
@@ -206,7 +206,7 @@ export default function AccessibilityPage() {
         <h2 className="font-serif text-2xl text-foreground">Why these tools matter</h2>
         <p className="text-muted-foreground">
           Neurodivergent learners process text, light, and sound differently — and so does everyone
-          else, to varying degrees. Rather than a single &ldquo;one size fits all&rdquo; design, NeuroBridge
+          else, to varying degrees. Rather than a single &ldquo;one size fits all&rdquo; design, CHINI Learn
           lets you shape the interface around what actually works for you.
         </p>
         <Button variant="outline" asChild>

@@ -43,7 +43,7 @@ export default function RegisterPage() {
         setConfirmationSentTo(email);
         return;
       }
-      notify.success("Account created", `Welcome to NeuroBridge, ${profile?.fullName ?? "there"}.`);
+      notify.success("Account created", `Welcome to CHINI Learn, ${profile?.fullName ?? "there"}.`);
       hasRedirectedRef.current = true;
       router.replace(profile?.role === "admin" ? "/admin" : "/dashboard");
       router.refresh();
@@ -88,7 +88,7 @@ export default function RegisterPage() {
   return (
     <AuthCard
       title="Create your account"
-      description="Join NeuroBridge to track progress and earn certificates."
+      description="Join CHINI Learn to track progress and earn certificates."
       footer={
         <>
           Already have an account?{" "}

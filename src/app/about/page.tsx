@@ -27,22 +27,22 @@ const PILLARS = [
   {
     icon: Rocket,
     title: "Where we're headed",
-    body: "NeuroBridge launches with structured courses for teachers, alongside a growing resource library and guided support. Over time we plan to expand into more audiences, deeper personalization, and a wider course catalogue shaped directly by community need.",
+    body: "CHINI Learn launches with structured courses for teachers, alongside a growing resource library and guided support. Over time we plan to expand into more audiences, deeper personalization, and a wider course catalogue shaped directly by community need.",
   },
 ];
 
 const SECTIONS = [
   {
     title: "Who this platform helps",
-    body: "While teachers are our primary audience at launch, NeuroBridge is built to scale to caregivers, parents, students, mental health professionals, therapists, employers, and anyone who wants to understand neurodiversity and inclusion more deeply.",
+    body: "While teachers are our primary audience at launch, CHINI Learn is built to scale to caregivers, parents, students, mental health professionals, therapists, employers, and anyone who wants to understand neurodiversity and inclusion more deeply.",
   },
   {
     title: "How it supports learning and inclusion",
-    body: "Structured, self-paced courses break long-form expert knowledge into manageable modules and lessons. Downloadable resources turn that knowledge into ready-to-use tools. The NeuroGuide assistant offers a supportive, always-available first stop for specific questions. Together, they form one accessible learning journey.",
+    body: "Structured, self-paced courses break long-form expert knowledge into manageable modules and lessons. Downloadable resources turn that knowledge into ready-to-use tools, forming one accessible learning journey.",
   },
   {
     title: "Long-term direction",
-    body: "We're building NeuroBridge to grow with the community it serves — more courses, more resource types, deeper accessibility tooling, and closer guidance, all grounded in the same evidence-based, inclusion-first approach we started with.",
+    body: "We're building CHINI Learn to grow with the community it serves — more courses, more resource types, deeper accessibility tooling, and closer guidance, all grounded in the same evidence-based, inclusion-first approach we started with.",
   },
 ];
 
@@ -52,10 +52,10 @@ export default function AboutPage() {
       <Reveal className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-medium tracking-widest text-primary-text uppercase">About us</p>
         <h1 className="mt-4 font-serif text-4xl tracking-tight text-foreground sm:text-5xl">
-          <SplitReveal text="About NeuroBridge" />
+          <SplitReveal text="About CHINI Learn" />
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-          NeuroBridge is an independent platform from The Chini Trust, built to make neurodiversity
+          CHINI Learn is an independent platform from The Chini Trust, built to make neurodiversity
           education, resources, and support accessible to everyone who needs them.
         </p>
       </Reveal>
@@ -91,7 +91,7 @@ export default function AboutPage() {
         <Reveal className="mx-auto max-w-2xl text-center" variant="blur">
           <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Our team</p>
           <h2 className="mt-4 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
-            The people behind NeuroBridge
+            The people behind CHINI Learn
           </h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             A small team of educators, accessibility specialists, and community organisers.

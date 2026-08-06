@@ -20,7 +20,7 @@ export function DashboardStatCard({ icon: Icon, label, value, accent, tone }: Da
 
   return (
     <Card tone={resolvedTone === "primary" ? "brand" : resolvedTone === "accent" ? "accent" : "default"} interactive className="h-full">
-      <CardContent className="flex h-full items-center gap-5 p-6">
+      <CardContent className="flex h-full items-center gap-5 p-6 sm:p-6">
         <span
           className={cn(
             "flex size-14 shrink-0 items-center justify-center rounded-xl",

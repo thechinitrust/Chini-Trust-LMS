@@ -1,14 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { BookOpen, CheckCircle2, Award, History, Library, Calendar, Zap, ArrowRight, Flame } from "lucide-react";
+import { BookOpen, CheckCircle2, Award, History, Library, Calendar, Zap, ArrowRight } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getProfileById } from "@/lib/data/users";
 import { listCourses } from "@/lib/data/courses";
 import { getEnrollmentsForUser } from "@/lib/data/enrollments";
 import { getCertificatesForUser } from "@/lib/data/certificates";
-import { getCourseCompletionPercent, getDayStreak, getProgressForUser } from "@/lib/data/progress";
+import { getCourseCompletionPercent, getProgressForUser } from "@/lib/data/progress";
 import { getLessonById } from "@/lib/data/lessons";
 import { getModuleById } from "@/lib/data/modules";
 import { getUpcomingEvents } from "@/lib/data/events";
@@ -33,11 +33,10 @@ export default async function DashboardPage() {
   const profile = await getProfileById(supabase, authUserId).catch(() => undefined);
   const fullName = profile?.fullName || (user.user_metadata?.full_name as string | undefined) || user.email?.split("@")[0] || "there";
 
-  const [enrollments, certificates, progressRows, dayStreak, courses, upcomingEvents] = await Promise.all([
+  const [enrollments, certificates, progressRows, courses, upcomingEvents] = await Promise.all([
     getEnrollmentsForUser(supabase, authUserId).catch(() => []),
     getCertificatesForUser(supabase, authUserId).catch(() => []),
     getProgressForUser(supabase, authUserId).catch(() => []),
-    getDayStreak(supabase, authUserId).catch(() => 0),
     listCourses(supabase).catch(() => []),
     getUpcomingEvents(supabase, 2).catch(() => []),
   ]);
@@ -104,10 +103,10 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 space-y-10">
           <RevealGroup className="grid gap-4 sm:grid-cols-3">
             <RevealItem>
-              <DashboardStatCard icon={Flame} label="Day Streak" value={dayStreak} tone="primary" />
+              <DashboardStatCard icon={CheckCircle2} label="Courses completed" value={completed.length} tone="accent" />
             </RevealItem>
             <RevealItem>
-              <DashboardStatCard icon={CheckCircle2} label="Courses completed" value={completed.length} tone="accent" />
+              <DashboardStatCard icon={BookOpen} label="Courses enrolled" value={enrollments.length} tone="primary" />
             </RevealItem>
             <RevealItem>
               <DashboardStatCard icon={Zap} label="Average progress" value={`${avgProgress}%`} />
@@ -155,7 +154,7 @@ export default async function DashboardPage() {
                 return (
                   <Link key={p.id} href={`/lessons/${lesson.id}`}>
                     <Card className="transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
-                      <CardContent className="flex items-center justify-between gap-4 p-5">
+                      <CardContent className="flex items-center justify-between gap-4 p-5 sm:p-5">
                         <div className="flex items-center gap-4 min-w-0">
                           <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                             <BookOpen className="size-5" strokeWidth={1.5} />

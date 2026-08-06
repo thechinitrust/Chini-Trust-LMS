@@ -31,7 +31,7 @@ const DEFAULT_STATE: AccessibilityState = {
   readAloudMode: "page",
 };
 
-const STORAGE_KEY = "neurobridge.accessibility";
+const STORAGE_KEY = "chini-learn.accessibility";
 
 const AccessibilityContext = React.createContext<AccessibilityContextValue | undefined>(undefined);
 

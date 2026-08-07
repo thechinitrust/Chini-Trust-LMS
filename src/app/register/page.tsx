@@ -8,6 +8,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { notify } from "@/lib/toast";
 import { AuthCard } from "@/components/auth/auth-card";
+import { AuthRedirecting } from "@/components/auth/auth-redirecting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,7 +56,7 @@ export default function RegisterPage() {
   };
 
   if (!isLoading && user) {
-    return null;
+    return <AuthRedirecting label="Setting up your account…" />;
   }
 
   if (confirmationSentTo) {

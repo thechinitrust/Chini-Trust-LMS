@@ -52,9 +52,23 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 );
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col gap-1.5 p-6 sm:p-7", className)} {...props} />
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Renders the header as its own banner separated by a rule. The content below
+   * then keeps its full top padding instead of flowing up into the header.
+   */
+  divided?: boolean;
+}
+
+const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, divided, ...props }, ref) => (
+    <div
+      ref={ref}
+      data-slot="card-header"
+      data-divided={divided ? "true" : undefined}
+      className={cn("flex flex-col gap-1.5 p-6 sm:p-7", divided && "border-b border-border/50", className)}
+      {...props}
+    />
   )
 );
 CardHeader.displayName = "CardHeader";
@@ -73,16 +87,36 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
 );
 CardDescription.displayName = "CardDescription";
 
+/**
+ * Padding is symmetric by default so a content block sits centred in its own
+ * section. Top padding collapses only when it flows directly out of an
+ * undivided header -- a `divided` header is a separate banner, so the content
+ * below keeps its own padding. Expressed as a sibling variant so a call-site
+ * `p-*` override can't strip the `pt-0` at one breakpoint and keep it at another.
+ */
 const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("p-6 pt-0 sm:p-7 sm:pt-0", className)} {...props} />
+    <div
+      ref={ref}
+      data-slot="card-content"
+      className={cn("p-6 sm:p-7 [[data-slot=card-header]:not([data-divided])+&]:pt-0", className)}
+      {...props}
+    />
   )
 );
 CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex items-center p-6 pt-0 sm:p-7 sm:pt-0", className)} {...props} />
+    <div
+      ref={ref}
+      data-slot="card-footer"
+      className={cn(
+        "flex items-center p-6 sm:p-7 [[data-slot=card-header]:not([data-divided])+&]:pt-0 [[data-slot=card-content]+&]:pt-0",
+        className
+      )}
+      {...props}
+    />
   )
 );
 CardFooter.displayName = "CardFooter";

@@ -184,12 +184,12 @@ export default async function DashboardPage() {
 
         <div className="space-y-8">
           <Card className="border-border shadow-sm">
-            <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
+            <CardHeader divided className="bg-muted/20">
               <CardTitle className="flex items-center gap-2 text-lg font-serif">
                 <Calendar className="size-5 text-primary" /> Upcoming
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-5 space-y-4">
+            <CardContent className="space-y-4">
               {upcomingEvents.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">Nothing scheduled right now.</p>
               ) : (
@@ -213,7 +213,7 @@ export default async function DashboardPage() {
           </Card>
 
           <Card className="border-border shadow-sm">
-            <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
+            <CardHeader divided className="bg-muted/20">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg font-serif">
                   <Award className="size-5 text-accent" /> Certificates
@@ -223,7 +223,7 @@ export default async function DashboardPage() {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="p-5 space-y-4">
+            <CardContent className="space-y-4">
               {certificates.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No certificates earned yet.</p>
               ) : (
@@ -245,12 +245,12 @@ export default async function DashboardPage() {
 
           {recommendedCourses.length > 0 && (
             <Card className="border-border shadow-sm bg-primary/5 border-primary/10">
-              <CardHeader className="pb-3 border-b border-primary/10">
+              <CardHeader divided className="border-primary/10">
                 <CardTitle className="flex items-center gap-2 text-lg font-serif text-primary-text">
                   <Zap className="size-5" /> Recommended for you
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-5 space-y-4">
+              <CardContent className="space-y-4">
                 {recommendedCourses.map((course) => (
                   <Link key={course.id} href={`/courses/${course.slug}`} className="group block">
                     <div className="flex gap-4 items-center">

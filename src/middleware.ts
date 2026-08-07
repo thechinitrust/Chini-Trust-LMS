@@ -10,8 +10,10 @@ const AUTH_ONLY_PATHS = ["/login", "/register"];
 /**
  * Refreshes the Supabase session cookie on every request and redirects
  * unauthenticated requests away from protected routes before they render.
- * `RequireAuth` (src/components/auth/require-auth.tsx) is a UX layer on top
- * of this, not a replacement for it -- this is the real security boundary.
+ * Together with RLS -- which rejects unauthorized reads/writes regardless of
+ * what any page renders -- this is the security boundary for /dashboard and
+ * /admin. Those routes render their shells unconditionally and rely on it,
+ * so keep the matcher below covering them.
  *
  * Uses `getUser()` to authenticate sessions and validate tokens securely
  * with cookie synchronization across serverless and edge runtimes.

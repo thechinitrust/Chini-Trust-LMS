@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, type Variants, type Transition, type TargetAndTransition } from "framer-motion";
+import { motion, useInView, type Variants, type Transition, type TargetAndTransition } from "framer-motion";
 
 type Bezier = [number, number, number, number];
 
@@ -25,6 +25,46 @@ const VARIANT_MOTION: Record<RevealVariant, { hidden: TargetAndTransition; ease:
   blur: { hidden: { opacity: 0, y: 14, filter: "blur(10px)" }, ease: EASE_SILK },
 };
 
+const VIEWPORT_MARGIN = "-80px";
+
+/** On the client we need the pre-paint slot, so an off-screen element can be
+ *  reset to its hidden state before the browser ever paints it. useLayoutEffect
+ *  warns during SSR, where there is nothing to measure anyway. */
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
+/**
+ * Decides, once at mount, whether this element should participate in the
+ * scroll reveal at all.
+ *
+ * Previously every Reveal rendered `initial={hidden}`, which meant the server
+ * HTML shipped with `opacity: 0` on essentially all page content. Anything
+ * above the fold then stayed invisible until framer-motion hydrated *and* the
+ * IntersectionObserver fired — a visible dead gap after a route's skeleton
+ * handed off, and permanently blank content if JS was slow or failed outright.
+ *
+ * So: content already on screen when we hydrate is left alone and never
+ * animates. Only content still below the fold is reset to hidden and revealed
+ * on scroll — and that reset happens off-screen, before paint, so it is never
+ * seen. `hasBeenInView` keeps that first reset instant while preserving the
+ * normal timed fade for every subsequent scroll in and out.
+ */
+function useScrollReveal(ref: React.RefObject<HTMLDivElement | null>, once: boolean) {
+  const [revealOnScroll, setRevealOnScroll] = React.useState(false);
+  const inView = useInView(ref, { margin: VIEWPORT_MARGIN, once });
+  const hasBeenInView = React.useRef(false);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || el.getBoundingClientRect().top < window.innerHeight) return;
+    setRevealOnScroll(true);
+  }, []);
+
+  if (inView) hasBeenInView.current = true;
+
+  const isHidden = revealOnScroll && !inView;
+  return { isHidden, isFirstReset: isHidden && !hasBeenInView.current };
+}
+
 interface RevealProps {
   children: React.ReactNode;
   className?: string;
@@ -38,9 +78,11 @@ interface RevealProps {
   [dataAttr: `data-${string}`]: unknown;
 }
 
-/** Fades content into place as it enters the viewport. Re-triggers in both
- *  scroll directions by default (`once: false`) so the motion feels alive
- *  rather than a one-shot mount animation. */
+/** Fades content into place as it enters the viewport. Content that is already
+ *  on screen at first paint stays visible and is never animated — see
+ *  `useScrollReveal`. Re-triggers in both scroll directions by default
+ *  (`once: false`) so the motion feels alive rather than a one-shot mount
+ *  animation. */
 export function Reveal({
   children,
   className,
@@ -65,13 +107,16 @@ export function Reveal({
     ease: motionConfig.ease,
   };
 
+  const ref = React.useRef<HTMLDivElement>(null);
+  const { isHidden, isFirstReset } = useScrollReveal(ref, once);
+
   return (
     <motion.div
+      ref={ref}
       className={className}
-      initial={hidden}
-      whileInView={visible}
-      viewport={{ once, margin: "-80px" }}
-      transition={transition}
+      initial={false}
+      animate={isHidden ? hidden : visible}
+      transition={isFirstReset ? { duration: 0 } : transition}
       {...rest}
     >
       {children}
@@ -89,12 +134,16 @@ interface RevealGroupProps {
 
 /** Stagger container — pair with <RevealItem> children. */
 export function RevealGroup({ children, className, stagger = 0.08, delay = 0, once = false }: RevealGroupProps) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const { isHidden, isFirstReset } = useScrollReveal(ref, once);
+
   return (
     <motion.div
+      ref={ref}
       className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin: "-80px" }}
+      initial={false}
+      animate={isHidden ? "hidden" : "visible"}
+      transition={isFirstReset ? { duration: 0 } : undefined}
       variants={{
         hidden: {},
         visible: {

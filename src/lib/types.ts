@@ -135,6 +135,7 @@ export interface Quiz {
   title: string;
   description: string;
   passThreshold: number;
+  isRequired: boolean;
 }
 
 export interface QuizAttempt {

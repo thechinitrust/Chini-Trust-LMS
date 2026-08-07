@@ -14,12 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AdminTable, type AdminTableColumn } from "@/components/admin/admin-table";
 import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
 
 function emptyDraft(moduleId: string, courseId: string): QuizInput {
-  return { moduleId, courseId, title: "", description: "", passThreshold: 70 };
+  return { moduleId, courseId, title: "", description: "", passThreshold: 70, isRequired: false };
 }
 
 export function QuizzesTable({
@@ -56,6 +57,7 @@ export function QuizzesTable({
       title: quiz.title,
       description: quiz.description,
       passThreshold: quiz.passThreshold,
+      isRequired: quiz.isRequired,
     });
     setDialogOpen(true);
   };
@@ -111,6 +113,15 @@ export function QuizzesTable({
       ),
     },
     { header: "Pass threshold", cell: (q) => `${q.passThreshold}%` },
+    {
+      header: "Required",
+      cell: (q) =>
+        q.isRequired ? (
+          <Badge variant="brand">Required</Badge>
+        ) : (
+          <Badge variant="outline">Optional</Badge>
+        ),
+    },
     {
       header: "Actions",
       cell: (q) => (
@@ -200,6 +211,19 @@ export function QuizzesTable({
               onChange={(e) => setDraft({ ...draft, passThreshold: Number(e.target.value) })}
             />
           </FormField>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <span className="text-sm font-medium text-foreground">Required</span>
+              <p className="text-xs text-muted-foreground">
+                Required quizzes must be passed to complete the course and earn a certificate. Optional
+                quizzes stay available as a self-check but never block completion.
+              </p>
+            </div>
+            <Switch
+              checked={draft.isRequired}
+              onCheckedChange={(checked) => setDraft({ ...draft, isRequired: checked })}
+            />
+          </div>
         </AdminForm>
       )}
     </div>

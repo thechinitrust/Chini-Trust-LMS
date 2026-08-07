@@ -161,8 +161,12 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
             </Card>
           )}
 
-          {/* ---- End-of-module quiz prompt ---- */}
-          {isLastInModule && moduleQuiz && (
+          {/* ---- End-of-module quiz prompt ----
+              Only shown for optional quizzes, as an ungated self-check.
+              Required quizzes aren't forced per-module -- they're
+              surfaced on the course overview page once every lesson in
+              the course is complete (see [courseId]/page.tsx). */}
+          {isLastInModule && moduleQuiz && !moduleQuiz.isRequired && (
             <Card tone="brand" className="mt-6 card-brand-rail">
               <CardContent className="flex flex-wrap items-center justify-between gap-4 p-6">
                 <div className="flex items-start gap-3">
@@ -170,7 +174,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
                   <div>
                     <h2 className="text-sm font-semibold text-foreground">You&apos;ve reached the end of this module</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Check your understanding with the {courseModule.title} quiz.
+                      Try the optional {courseModule.title} quiz to check your understanding.
                     </p>
                   </div>
                 </div>

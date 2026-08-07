@@ -9,6 +9,7 @@ interface QuizRow {
   title: string;
   description: string;
   pass_threshold: number;
+  is_required: boolean;
 }
 
 function mapQuiz(row: QuizRow): Quiz {
@@ -19,10 +20,11 @@ function mapQuiz(row: QuizRow): Quiz {
     title: row.title,
     description: row.description,
     passThreshold: row.pass_threshold,
+    isRequired: row.is_required,
   };
 }
 
-const QUIZ_COLUMNS = "id, module_id, course_id, title, description, pass_threshold";
+const QUIZ_COLUMNS = "id, module_id, course_id, title, description, pass_threshold, is_required";
 
 export async function listQuizzes(client: SupabaseClient): Promise<Quiz[]> {
   const { data, error } = await client.from("quizzes").select(QUIZ_COLUMNS);
@@ -46,12 +48,19 @@ export async function getQuizForModule(client: SupabaseClient, moduleId: string)
   return data ? mapQuiz(data as QuizRow) : undefined;
 }
 
+export async function getQuizzesForCourse(client: SupabaseClient, courseId: string): Promise<Quiz[]> {
+  const { data, error } = await client.from("quizzes").select(QUIZ_COLUMNS).eq("course_id", courseId);
+  if (error) throw error;
+  return (data as QuizRow[]).map(mapQuiz);
+}
+
 export interface QuizInput {
   moduleId: string;
   courseId: string;
   title: string;
   description: string;
   passThreshold: number;
+  isRequired: boolean;
 }
 
 export async function createQuiz(client: SupabaseClient, input: QuizInput): Promise<Quiz> {
@@ -63,6 +72,7 @@ export async function createQuiz(client: SupabaseClient, input: QuizInput): Prom
       title: input.title,
       description: input.description,
       pass_threshold: input.passThreshold,
+      is_required: input.isRequired,
     })
     .select(QUIZ_COLUMNS)
     .single();
@@ -79,6 +89,7 @@ export async function updateQuiz(client: SupabaseClient, id: string, input: Quiz
       title: input.title,
       description: input.description,
       pass_threshold: input.passThreshold,
+      is_required: input.isRequired,
     })
     .eq("id", id)
     .select(QUIZ_COLUMNS)

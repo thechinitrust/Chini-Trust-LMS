@@ -58,6 +58,7 @@ begin
     select 1
     from public.quizzes q
     where q.course_id = p_course_id
+      and q.is_required
       and not exists (
         select 1 from public.quiz_attempts qa
         where qa.quiz_id = q.id and qa.user_id = p_user_id and qa.passed
@@ -86,7 +87,7 @@ end;
 $$;
 
 -- Checks whether the CALLER has completed every published lesson and passed
--- every quiz in a course; if so, marks the enrollment completed and issues a
+-- every required quiz in a course; if so, marks the enrollment completed and issues a
 -- certificate (row only -- no PDF, see supabase/schemas/50_certificates.sql).
 -- "Passed" means any passing attempt ever, not just the most recent one --
 -- there's no attempt-invalidation concept in this schema.

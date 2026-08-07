@@ -5,6 +5,12 @@ create table public.quizzes (
   title text not null,
   description text not null default '',
   pass_threshold int not null default 70 check (pass_threshold between 0 and 100),
+  -- Required quizzes gate course completion/certificate issuance (see
+  -- private.run_course_completion) and are surfaced on the course overview
+  -- page once every lesson is complete, rather than as a per-module
+  -- interstitial. Optional quizzes are still reachable from the module page
+  -- as a self-check, but never block completion.
+  is_required boolean not null default true,
   updated_at timestamptz not null default now()
 );
 

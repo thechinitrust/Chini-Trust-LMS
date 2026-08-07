@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, BookOpen, CheckCircle2, Clock, Layers, PlayCircle } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CheckCircle2, Clock, Layers, ListChecks, PlayCircle } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCourseBySlug } from "@/lib/data/courses";
@@ -8,7 +8,9 @@ import { getModulesForCourse } from "@/lib/data/modules";
 import { getLessonsForCourse, getLessonsForModule } from "@/lib/data/lessons";
 import { getEnrollment } from "@/lib/data/enrollments";
 import { getCourseCompletionPercent, getProgressForUser } from "@/lib/data/progress";
+import { getLatestPassingAttempt, getQuizzesForCourse } from "@/lib/data/quizzes";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { YouTubeEmbedPlayer } from "@/components/shared/youtube-embed-player";
 import { CourseModuleAccordion } from "@/components/shared/course-module-accordion";
@@ -60,6 +62,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
   const introVideoId = course.previewVideoId ?? lessons[0]?.video.youtubeVideoId;
   const completedCount = lessons.filter((l) => completedLessonIds.has(l.id)).length;
   const firstIncompleteLesson = lessons.find((l) => !completedLessonIds.has(l.id)) ?? lessons[0];
+  const allLessonsComplete = lessons.length > 0 && completedCount === lessons.length;
+
+  // Required quizzes aren't forced per-module -- they only surface here,
+  // once every lesson in the course is complete, and gate the certificate
+  // (see private.run_course_completion). Optional quizzes stay reachable
+  // from their module page as an ungated self-check.
+  const moduleTitleById = Object.fromEntries(modules.map((m) => [m.id, m.title]));
+  const requiredQuizzes =
+    userId && isEnrolled && allLessonsComplete
+      ? await getQuizzesForCourse(supabase, course.id).then((quizzes) => quizzes.filter((q) => q.isRequired))
+      : [];
+  const requiredQuizStatus = await Promise.all(
+    requiredQuizzes.map(async (quiz) => ({
+      quiz,
+      passed: Boolean(await getLatestPassingAttempt(supabase, userId!, quiz.id)),
+    }))
+  );
+  const unpassedRequiredQuizzes = requiredQuizStatus.filter((s) => !s.passed);
 
   return (
     <div className="container-page px-6 py-12 lg:px-12 lg:py-16" data-focus-content="true">
@@ -167,6 +187,46 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
               />
             </div>
           </div>
+
+          {/* ---- Required quizzes, once every lesson is complete ---- */}
+          {unpassedRequiredQuizzes.length > 0 && (
+            <Card tone="brand" className="mt-8 card-brand-rail">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3">
+                  <ListChecks className="mt-0.5 size-5 shrink-0 text-primary" strokeWidth={1.5} aria-hidden="true" />
+                  <div>
+                    <h2 className="text-sm font-semibold text-foreground">
+                      You&apos;ve finished every lesson &mdash; one last step
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {course.requiresCertificate
+                        ? "Pass the required quiz below to complete this course and earn your certificate."
+                        : "Pass the required quiz below to complete this course."}
+                    </p>
+                  </div>
+                </div>
+                <ul className="mt-4 space-y-2.5">
+                  {unpassedRequiredQuizzes.map(({ quiz }) => (
+                    <li
+                      key={quiz.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-card px-4 py-3"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{quiz.title}</p>
+                        <p className="text-xs text-muted-foreground">{moduleTitleById[quiz.moduleId] ?? ""}</p>
+                      </div>
+                      <Button size="sm" asChild>
+                        <Link href={`/quizzes/${quiz.id}`}>
+                          Take the quiz
+                          <ArrowRight className="size-4" strokeWidth={1.5} aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </Reveal>
 
         {/* ---- Sticky enrolment card ---- */}

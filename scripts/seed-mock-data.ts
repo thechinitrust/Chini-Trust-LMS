@@ -180,6 +180,7 @@ async function seedQuizzes(courseIdMap: Map<string, string>, moduleIdMap: Map<st
     title: q.title,
     description: q.description,
     pass_threshold: q.passThreshold,
+    is_required: q.isRequired,
   }));
   const inserted = await insert<{ id: string; module_id: string; title: string }>("quizzes", rows);
 

@@ -475,6 +475,7 @@ export const mockQuizzes: Quiz[] = [
     title: "Autism Foundations Check",
     description: "Five questions covering the spectrum model and support strategies.",
     passThreshold: 70,
+    isRequired: true,
   },
   {
     id: "quiz-adhd",
@@ -483,6 +484,7 @@ export const mockQuizzes: Quiz[] = [
     title: "ADHD Essentials Check",
     description: "Quick check on executive function and support strategies.",
     passThreshold: 70,
+    isRequired: true,
   },
   {
     id: "quiz-dyslexia",
@@ -491,6 +493,7 @@ export const mockQuizzes: Quiz[] = [
     title: "Dyslexia Fundamentals Check",
     description: "Confirm your understanding of reading science and support strategies.",
     passThreshold: 70,
+    isRequired: true,
   },
   {
     id: "quiz-workplace",
@@ -499,6 +502,7 @@ export const mockQuizzes: Quiz[] = [
     title: "Inclusive Workplace Check",
     description: "Test your grasp of neuroinclusive hiring and onboarding practices.",
     passThreshold: 70,
+    isRequired: true,
   },
 ];
 

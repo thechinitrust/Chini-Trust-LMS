@@ -76,9 +76,14 @@ export default async function ModulePage({
         <Reveal delay={0.2} className="space-y-6" data-focus-aside="true">
           {quiz && (
             <div className="rounded-2xl border border-black/5 bg-card p-6 shadow-soft dark:border-white/10">
-              <div className="flex items-center gap-2.5">
-                <ListChecks className="size-5 text-primary" strokeWidth={1.5} aria-hidden="true" />
-                <h2 className="font-semibold text-foreground">Module quiz</h2>
+              <div className="flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5">
+                  <ListChecks className="size-5 text-primary" strokeWidth={1.5} aria-hidden="true" />
+                  <h2 className="font-semibold text-foreground">Module quiz</h2>
+                </div>
+                <Badge variant={quiz.isRequired ? "brand" : "outline"}>
+                  {quiz.isRequired ? "Required" : "Optional"}
+                </Badge>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{quiz.description}</p>
               <Button className="mt-5 w-full" asChild>

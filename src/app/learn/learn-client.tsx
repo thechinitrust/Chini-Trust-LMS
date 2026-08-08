@@ -2,20 +2,13 @@
 
 import * as React from "react";
 
-import type { Course, LearningCategory } from "@/lib/types";
+import type { Course } from "@/lib/types";
+import { categoryLabel } from "@/lib/categories";
 import { LearningCard } from "@/components/shared/learning-card";
 import { FilterTabs } from "@/components/shared/filter-tabs";
 import { SearchInput } from "@/components/shared/search-input";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
-
-const CATEGORY_OPTIONS: { value: LearningCategory | "all"; label: string }[] = [
-  { value: "all", label: "All topics" },
-  { value: "autism", label: "Autism" },
-  { value: "adhd", label: "ADHD" },
-  { value: "dyslexia", label: "Dyslexia" },
-  { value: "workplace", label: "Workplace Inclusion" },
-];
 
 export interface LearnCourseSummary {
   course: Course;
@@ -25,8 +18,15 @@ export interface LearnCourseSummary {
 }
 
 export function LearnClient({ courses }: { courses: LearnCourseSummary[] }) {
-  const [category, setCategory] = React.useState<LearningCategory | "all">("all");
+  const [category, setCategory] = React.useState<string>("all");
   const [query, setQuery] = React.useState("");
+
+  const categoryOptions = React.useMemo(() => {
+    const distinct = Array.from(new Set(courses.map(({ course }) => course.category))).sort((a, b) =>
+      categoryLabel(a).localeCompare(categoryLabel(b))
+    );
+    return [{ value: "all", label: "All topics" }, ...distinct.map((c) => ({ value: c, label: categoryLabel(c) }))];
+  }, [courses]);
 
   const filtered = courses.filter(({ course }) => {
     const matchesCategory = category === "all" || course.category === category;
@@ -47,7 +47,7 @@ export function LearnClient({ courses }: { courses: LearnCourseSummary[] }) {
       </Reveal>
 
       <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <FilterTabs options={CATEGORY_OPTIONS} value={category} onChange={setCategory} />
+        <FilterTabs options={categoryOptions} value={category} onChange={setCategory} />
         <SearchInput
           placeholder="Search courses..."
           value={query}

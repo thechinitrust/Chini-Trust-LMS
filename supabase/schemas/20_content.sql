@@ -7,7 +7,7 @@ create table public.courses (
   title text not null,
   summary text not null,
   description text not null,
-  category text not null check (category in ('autism', 'adhd', 'dyslexia', 'workplace')),
+  category text not null, -- free text; admins can enter any topic, not just the launch four
   audience text[] not null default '{}'
     check (audience <@ array['students', 'parents', 'teachers', 'employers', 'neurodivergent-individuals']::text[]),
   thumbnail_url text not null default '',
@@ -199,3 +199,30 @@ create policy "resources_admin_delete"
   on public.resources for delete
   to authenticated
   using (private.is_admin());
+
+-- Public bucket: course banners are marketing images shown on the catalogue
+-- and course pages, so anyone may read them. Only admins may write.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('course-thumbnails', 'course-thumbnails', true, 512000, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update set file_size_limit = excluded.file_size_limit;
+
+create policy "course_thumbnail_objects_select_public"
+  on storage.objects for select
+  to anon, authenticated
+  using (bucket_id = 'course-thumbnails');
+
+create policy "course_thumbnail_objects_admin_insert"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'course-thumbnails' and private.is_admin());
+
+create policy "course_thumbnail_objects_admin_update"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'course-thumbnails' and private.is_admin())
+  with check (bucket_id = 'course-thumbnails' and private.is_admin());
+
+create policy "course_thumbnail_objects_admin_delete"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'course-thumbnails' and private.is_admin());

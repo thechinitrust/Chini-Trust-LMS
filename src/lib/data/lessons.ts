@@ -153,3 +153,15 @@ export async function deleteLesson(client: SupabaseClient, id: string): Promise<
   const { error } = await client.from("lessons").delete().eq("id", id);
   if (error) throw error;
 }
+
+/** Persists a new top-to-bottom order for a module's lessons after a drag-reorder. */
+export async function reorderLessons(
+  client: SupabaseClient,
+  orderedIds: string[]
+): Promise<void> {
+  const results = await Promise.all(
+    orderedIds.map((id, index) => client.from("lessons").update({ order: index + 1 }).eq("id", id))
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw failed.error;
+}

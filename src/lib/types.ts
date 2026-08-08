@@ -19,7 +19,8 @@ export interface Profile {
   createdAt: string;
 }
 
-export type LearningCategory = "autism" | "adhd" | "dyslexia" | "workplace";
+/** Free text — admins can enter any category, not just the launch four. */
+export type LearningCategory = string;
 
 export type AudienceTag = "students" | "parents" | "teachers" | "employers" | "neurodivergent-individuals";
 

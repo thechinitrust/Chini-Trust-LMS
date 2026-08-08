@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, Award, BookOpen, CheckCircle2, Clock, Layers, ListChecks, PlayCircle } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { categoryLabel } from "@/lib/categories";
 import { getCourseBySlug } from "@/lib/data/courses";
 import { getModulesForCourse } from "@/lib/data/modules";
 import { getLessonsForCourse, getLessonsForModule } from "@/lib/data/lessons";
@@ -23,13 +24,6 @@ const AUDIENCE_LABEL: Record<string, string> = {
   teachers: "Teachers",
   employers: "Employers",
   "neurodivergent-individuals": "Neurodivergent individuals",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  autism: "Autism",
-  adhd: "ADHD",
-  dyslexia: "Dyslexia",
-  workplace: "Workplace Inclusion",
 };
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
@@ -96,7 +90,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
         </nav>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="brand">{CATEGORY_LABEL[course.category] ?? course.category}</Badge>
+          <Badge variant="brand">{categoryLabel(course.category)}</Badge>
           <Badge variant="outline" className="capitalize">
             {course.level}
           </Badge>

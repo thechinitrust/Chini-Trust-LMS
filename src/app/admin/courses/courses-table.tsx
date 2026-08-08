@@ -1,31 +1,28 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ImageOff, Pencil, Plus, Trash2 } from "lucide-react";
 
-import type { Course, LearningCategory } from "@/lib/types";
+import type { Course } from "@/lib/types";
+import { categoryLabel } from "@/lib/categories";
 import { createClient } from "@/lib/supabase/client";
-import { createCourse, deleteCourse, setCoursePublished, updateCourse, type CourseInput } from "@/lib/data/courses";
+import { createCourse, deleteCourse, setCoursePublished, type CourseInput } from "@/lib/data/courses";
 import { notify } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AdminTable, type AdminTableColumn } from "@/components/admin/admin-table";
 import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
-
-const CATEGORIES: LearningCategory[] = ["autism", "adhd", "dyslexia", "workplace"];
-
-const CATEGORY_LABEL: Record<LearningCategory, string> = {
-  autism: "Autism",
-  adhd: "ADHD",
-  dyslexia: "Dyslexia",
-  workplace: "Workplace Inclusion",
-};
+import { CategoryInput } from "@/components/admin/category-input";
+import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
+import { EmptyState } from "@/components/shared/empty-state";
 
 function slugify(title: string) {
   return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -37,9 +34,9 @@ function emptyDraft(): CourseInput {
     title: "",
     summary: "",
     description: "",
-    category: "autism",
+    category: "",
     audience: ["teachers"],
-    thumbnailUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80",
+    thumbnailUrl: "",
     estimatedMinutes: 60,
     level: "beginner",
     objectives: [],
@@ -56,20 +53,12 @@ export function CoursesTable({
   moduleCounts: Record<string, number>;
 }) {
   const router = useRouter();
-  const [editingId, setEditingId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<CourseInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
 
   const openCreate = () => {
-    setEditingId(null);
     setDraft(emptyDraft());
-    setDialogOpen(true);
-  };
-
-  const openEdit = (course: Course) => {
-    setEditingId(course.id);
-    setDraft({ ...course });
     setDialogOpen(true);
   };
 
@@ -79,18 +68,22 @@ export function CoursesTable({
       notify.error("Title is required");
       return;
     }
+    if (!draft.category.trim()) {
+      notify.error("Category is required");
+      return;
+    }
+    if (!draft.thumbnailUrl) {
+      notify.error("Upload a course banner image before saving");
+      return;
+    }
     setIsSaving(true);
     try {
       const supabase = createClient();
       const input: CourseInput = { ...draft, slug: draft.slug || slugify(draft.title) };
-      if (editingId) {
-        await updateCourse(supabase, editingId, input);
-      } else {
-        await createCourse(supabase, input);
-      }
-      notify.success("Course saved");
+      const created = await createCourse(supabase, input);
+      notify.success("Course created — add modules and lessons below");
       setDialogOpen(false);
-      router.refresh();
+      router.push(`/admin/courses/${created.id}`);
     } catch (error) {
       notify.error("Couldn't save course", error instanceof Error ? error.message : undefined);
     } finally {
@@ -120,40 +113,14 @@ export function CoursesTable({
     }
   };
 
-  const columns: AdminTableColumn<Course>[] = [
-    { header: "Title", cell: (c) => <span className="font-medium text-foreground">{c.title}</span> },
-    { header: "Category", cell: (c) => <span>{CATEGORY_LABEL[c.category]}</span> },
-    { header: "Level", cell: (c) => <span className="capitalize">{c.level}</span> },
-    { header: "Modules", cell: (c) => moduleCounts[c.id] ?? 0 },
-    {
-      header: "Status",
-      cell: (c) => (
-        <button onClick={() => togglePublished(c)}>
-          <Badge variant={c.published ? "success" : "outline"}>{c.published ? "Published" : "Draft"}</Badge>
-        </button>
-      ),
-    },
-    {
-      header: "Actions",
-      cell: (c) => (
-        <div className="flex gap-2">
-          <Button size="icon" variant="ghost" onClick={() => openEdit(c)} aria-label={`Edit ${c.title}`}>
-            <Pencil className="size-4" />
-          </Button>
-          <Button size="icon" variant="ghost" onClick={() => handleDelete(c.id, c.title)} aria-label={`Delete ${c.title}`}>
-            <Trash2 className="size-4 text-destructive" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-serif text-3xl tracking-tight text-foreground">Courses</h1>
-          <p className="mt-2 text-muted-foreground">Create and manage the course catalogue.</p>
+          <p className="mt-2 text-muted-foreground">
+            Create a course, then open it to manage its modules and lessons in one place.
+          </p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" aria-hidden="true" />
@@ -162,13 +129,87 @@ export function CoursesTable({
       </div>
 
       <div className="mt-6">
-        <AdminTable
-          columns={columns}
-          rows={courses}
-          getRowId={(c) => c.id}
-          emptyTitle="No courses yet"
-          emptyDescription="Create your first course to get started."
-        />
+        {courses.length === 0 ? (
+          <EmptyState title="No courses yet" description="Create your first course to get started." />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {courses.map((course) => (
+              <Card key={course.id} className="flex flex-col overflow-hidden">
+                <div className="relative aspect-[16/9] w-full bg-muted">
+                  {course.thumbnailUrl ? (
+                    <Image
+                      src={course.thumbnailUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                      <ImageOff className="size-7" strokeWidth={1.5} aria-hidden="true" />
+                    </div>
+                  )}
+                  <div className="absolute left-3 top-3">
+                    <Badge variant="brand" className="bg-background/90 backdrop-blur">
+                      {categoryLabel(course.category)}
+                    </Badge>
+                  </div>
+                  <button
+                    onClick={() => togglePublished(course)}
+                    className="absolute right-3 top-3"
+                    aria-label="Toggle published status"
+                  >
+                    <Badge
+                      variant={course.published ? "success" : "outline"}
+                      className="bg-background/90 backdrop-blur"
+                    >
+                      {course.published ? "Published" : "Draft"}
+                    </Badge>
+                  </button>
+                </div>
+
+                <CardContent className="flex flex-1 flex-col gap-3 p-5">
+                  <div>
+                    <Link
+                      href={`/admin/courses/${course.id}`}
+                      className="text-lg font-semibold leading-snug text-foreground hover:text-primary-text"
+                    >
+                      {course.title}
+                    </Link>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{course.summary}</p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="capitalize">{course.level}</span>
+                    <span>&middot;</span>
+                    <span>
+                      {moduleCounts[course.id] ?? 0} {moduleCounts[course.id] === 1 ? "module" : "modules"}
+                    </span>
+                    <span>&middot;</span>
+                    <span>{course.estimatedMinutes} min</span>
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/admin/courses/${course.id}`}>
+                        <Pencil className="size-3.5" aria-hidden="true" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleDelete(course.id, course.title)}
+                      aria-label={`Delete ${course.title}`}
+                    >
+                      <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {draft && (
@@ -176,11 +217,16 @@ export function CoursesTable({
           trigger={<span />}
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          title={editingId ? "Edit course" : "New course"}
-          description="Core details shown across the catalogue and course page."
+          title="New course"
+          description="Add the core details, then manage modules and lessons on the course's own page."
           onSubmit={handleSave}
           submitLabel={isSaving ? "Saving…" : "Save course"}
         >
+          <CourseThumbnailUpload
+            value={draft.thumbnailUrl}
+            onChange={(url) => setDraft({ ...draft, thumbnailUrl: url })}
+            required
+          />
           <FormField label="Title" htmlFor="course-title">
             <Input
               id="course-title"
@@ -207,21 +253,11 @@ export function CoursesTable({
           </FormField>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Category" htmlFor="course-category">
-              <Select
+              <CategoryInput
+                id="course-category"
                 value={draft.category}
-                onValueChange={(v) => setDraft({ ...draft, category: v as LearningCategory })}
-              >
-                <SelectTrigger id="course-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {CATEGORY_LABEL[cat]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(v) => setDraft({ ...draft, category: v })}
+              />
             </FormField>
             <FormField label="Level" htmlFor="course-level">
               <Select

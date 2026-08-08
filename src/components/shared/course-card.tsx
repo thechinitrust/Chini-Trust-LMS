@@ -6,16 +6,10 @@ import { Clock, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 import type { Course } from "@/lib/types";
+import { categoryLabel } from "@/lib/categories";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProgressBar } from "@/components/shared/progress-bar";
-
-const CATEGORY_LABEL: Record<Course["category"], string> = {
-  autism: "Autism",
-  adhd: "ADHD",
-  dyslexia: "Dyslexia",
-  workplace: "Workplace Inclusion",
-};
 
 interface CourseCardProps {
   course: Course;
@@ -36,7 +30,7 @@ export function CourseCard({ course, progress }: CourseCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           <Badge className="absolute top-3 left-3 border-white/20 bg-white/90 text-foreground backdrop-blur-sm dark:bg-black/60">
-            {CATEGORY_LABEL[course.category]}
+            {categoryLabel(course.category)}
           </Badge>
         </div>
         <CardContent className="flex flex-1 flex-col gap-3 p-6 sm:p-6">

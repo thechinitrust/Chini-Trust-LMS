@@ -25,8 +25,6 @@ import { Button } from "@/components/ui/button";
 
 const QUICK_LINKS = [
   { href: "/admin/courses", label: "Manage courses" },
-  { href: "/admin/modules", label: "Manage modules" },
-  { href: "/admin/lessons", label: "Manage lessons & videos" },
   { href: "/admin/resources", label: "Manage resources" },
   { href: "/admin/quizzes", label: "Manage quizzes" },
   { href: "/admin/events", label: "Manage events" },

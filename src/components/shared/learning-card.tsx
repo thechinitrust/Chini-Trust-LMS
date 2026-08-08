@@ -6,16 +6,10 @@ import { BookOpen, Clock, Layers, Signal } from "lucide-react";
 import { motion } from "framer-motion";
 
 import type { Course } from "@/lib/types";
+import { categoryLabel } from "@/lib/categories";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProgressBar } from "@/components/shared/progress-bar";
-
-const CATEGORY_LABEL: Record<Course["category"], string> = {
-  autism: "Autism",
-  adhd: "ADHD",
-  dyslexia: "Dyslexia",
-  workplace: "Workplace Inclusion",
-};
 
 const AUDIENCE_LABEL: Record<string, string> = {
   students: "Students",
@@ -50,7 +44,7 @@ export function LearningCard({ course, progress, lessonCount, moduleCount }: Lea
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
             <Badge className="absolute top-3 left-3 border-none bg-primary text-primary-foreground shadow-soft">
-              {CATEGORY_LABEL[course.category]}
+              {categoryLabel(course.category)}
             </Badge>
             {started && (
               <span className="absolute right-3 bottom-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-primary-text shadow-soft dark:bg-black/80">

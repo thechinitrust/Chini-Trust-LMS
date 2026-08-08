@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { categoryLabel } from "@/lib/categories";
+
 const MONTH_LABEL = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Last `months` calendar months (oldest first), ending with the current month. */
@@ -153,13 +155,6 @@ export async function getAudienceDistribution(client: SupabaseClient): Promise<{
     .sort((a, b) => b.value - a.value);
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  autism: "Autism",
-  adhd: "ADHD",
-  dyslexia: "Dyslexia",
-  workplace: "Workplace",
-};
-
 export async function getCompletionRatesByCategory(
   client: SupabaseClient
 ): Promise<{ name: string; rate: number }[]> {
@@ -182,7 +177,7 @@ export async function getCompletionRatesByCategory(
   }
 
   return Array.from(totals.entries()).map(([category, { total, completed }]) => ({
-    name: CATEGORY_LABEL[category] ?? category,
+    name: categoryLabel(category),
     rate: total === 0 ? 0 : Math.round((completed / total) * 100),
   }));
 }

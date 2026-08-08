@@ -6,8 +6,6 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
-  Layers,
-  PlayCircle,
   FileText,
   ListChecks,
   Users,
@@ -20,8 +18,6 @@ import { cn } from "@/lib/utils";
 const ADMIN_LINKS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
-  { href: "/admin/modules", label: "Modules", icon: Layers },
-  { href: "/admin/lessons", label: "Lessons & Videos", icon: PlayCircle },
   { href: "/admin/resources", label: "Resources", icon: FileText },
   { href: "/admin/quizzes", label: "Quizzes", icon: ListChecks },
   { href: "/admin/events", label: "Events", icon: CalendarDays },

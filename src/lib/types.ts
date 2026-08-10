@@ -162,7 +162,7 @@ export interface Certificate {
 export interface AccessibilityPreferences {
   userId: string;
   darkMode: boolean;
-  dyslexiaFont: boolean;
+  fontChoice: "default" | "dyslexic" | "lato" | "atkinson" | "lexend";
   textScale: "default" | "lg" | "xl";
   focusMode: boolean;
   readAloud: boolean;

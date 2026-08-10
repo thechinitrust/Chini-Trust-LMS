@@ -5,9 +5,11 @@ import * as React from "react";
 export type TextScale = "default" | "lg" | "xl";
 /** How the read-aloud control sources the text it speaks. */
 export type ReadAloudMode = "page" | "selection";
+/** Reading font applied site-wide — each maps to a `.font-{value}` class in globals.css. */
+export type FontChoice = "default" | "dyslexic" | "lato" | "atkinson" | "lexend";
 
 interface AccessibilityState {
-  dyslexiaFont: boolean;
+  fontChoice: FontChoice;
   textScale: TextScale;
   focusMode: boolean;
   readAloud: boolean;
@@ -15,7 +17,7 @@ interface AccessibilityState {
 }
 
 interface AccessibilityContextValue extends AccessibilityState {
-  setDyslexiaFont: (value: boolean) => void;
+  setFontChoice: (value: FontChoice) => void;
   setTextScale: (value: TextScale) => void;
   setFocusMode: (value: boolean) => void;
   setReadAloud: (value: boolean) => void;
@@ -24,12 +26,14 @@ interface AccessibilityContextValue extends AccessibilityState {
 }
 
 const DEFAULT_STATE: AccessibilityState = {
-  dyslexiaFont: false,
+  fontChoice: "default",
   textScale: "default",
   focusMode: false,
   readAloud: false,
   readAloudMode: "page",
 };
+
+const FONT_CLASSES = ["font-dyslexic", "font-lato", "font-atkinson", "font-lexend"];
 
 const STORAGE_KEY = "chini-learn.accessibility";
 
@@ -41,7 +45,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   React.useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) setState({ ...DEFAULT_STATE, ...JSON.parse(stored) });
+      if (!stored) return;
+      const parsed = JSON.parse(stored);
+      // Migrate the old binary `dyslexiaFont` flag to `fontChoice`.
+      if (parsed.fontChoice === undefined && parsed.dyslexiaFont) parsed.fontChoice = "dyslexic";
+      delete parsed.dyslexiaFont;
+      setState({ ...DEFAULT_STATE, ...parsed });
     } catch {
       // ignore malformed storage
     }
@@ -50,7 +59,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   React.useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     const root = document.documentElement;
-    root.classList.toggle("font-dyslexic", state.dyslexiaFont);
+    root.classList.remove(...FONT_CLASSES);
+    if (state.fontChoice !== "default") root.classList.add(`font-${state.fontChoice}`);
     root.classList.toggle("focus-mode", state.focusMode);
     root.classList.remove("text-scale-lg", "text-scale-xl");
     if (state.textScale === "lg") root.classList.add("text-scale-lg");
@@ -59,7 +69,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
   const value: AccessibilityContextValue = {
     ...state,
-    setDyslexiaFont: (dyslexiaFont) => setState((s) => ({ ...s, dyslexiaFont })),
+    setFontChoice: (fontChoice) => setState((s) => ({ ...s, fontChoice })),
     setTextScale: (textScale) => setState((s) => ({ ...s, textScale })),
     setFocusMode: (focusMode) => setState((s) => ({ ...s, focusMode })),
     setReadAloud: (readAloud) => setState((s) => ({ ...s, readAloud })),

@@ -281,7 +281,7 @@
     border: 2px solid var(--background);
   }
 
-  /* Accessibility: dyslexia-friendly typography mode */
+  /* Accessibility: reading-font modes (see AccessibilityProvider's `fontChoice`) */
   .font-dyslexic body,
   .font-dyslexic {
     font-family: var(--font-dyslexic);
@@ -293,6 +293,33 @@
   .font-dyslexic h3,
   .font-dyslexic h4 {
     font-family: var(--font-dyslexic);
+  }
+
+  .font-lato body,
+  .font-lato,
+  .font-lato h1,
+  .font-lato h2,
+  .font-lato h3,
+  .font-lato h4 {
+    font-family: var(--font-lato), var(--font-sans), sans-serif;
+  }
+
+  .font-atkinson body,
+  .font-atkinson,
+  .font-atkinson h1,
+  .font-atkinson h2,
+  .font-atkinson h3,
+  .font-atkinson h4 {
+    font-family: var(--font-atkinson), var(--font-sans), sans-serif;
+  }
+
+  .font-lexend body,
+  .font-lexend,
+  .font-lexend h1,
+  .font-lexend h2,
+  .font-lexend h3,
+  .font-lexend h4 {
+    font-family: var(--font-lexend), var(--font-sans), sans-serif;
   }
 
   /* Accessibility: larger base text size mode */
@@ -455,4 +482,15 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
   box-shadow: var(--shadow-soft);
+}
+
+/* Tiptap admin rich-text editor: Placeholder extension only emits the DOM
+   attribute, the visual style is left to the host app. */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  pointer-events: none;
 }

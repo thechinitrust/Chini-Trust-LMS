@@ -3,12 +3,13 @@
 import { useTheme } from "next-themes";
 import { Moon, Type, Focus, Volume2, TextCursorInput, FileText, TextSelect } from "lucide-react";
 
-import { useAccessibility, type TextScale, type ReadAloudMode } from "@/context/accessibility-context";
+import { useAccessibility, type TextScale, type ReadAloudMode, type FontChoice } from "@/context/accessibility-context";
 import { notify } from "@/lib/toast";
 import { AccessibilityControl } from "@/components/accessibility/accessibility-control";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { SplitReveal } from "@/components/motion/split-reveal";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,14 @@ const TEXT_SCALE_OPTIONS: { value: TextScale; label: string }[] = [
   { value: "xl", label: "A++" },
 ];
 
+const FONT_OPTIONS: { value: FontChoice; label: string }[] = [
+  { value: "default", label: "Default" },
+  { value: "dyslexic", label: "Dyslexia-friendly" },
+  { value: "lato", label: "Lato" },
+  { value: "atkinson", label: "Atkinson Hyperlegible" },
+  { value: "lexend", label: "Lexend" },
+];
+
 const READ_MODE_OPTIONS: { value: ReadAloudMode; label: string; icon: typeof FileText }[] = [
   { value: "page", label: "Entire page", icon: FileText },
   { value: "selection", label: "Selected text", icon: TextSelect },
@@ -27,8 +36,8 @@ const READ_MODE_OPTIONS: { value: ReadAloudMode; label: string; icon: typeof Fil
 export default function AccessibilityPage() {
   const { resolvedTheme, setTheme } = useTheme();
   const {
-    dyslexiaFont,
-    setDyslexiaFont,
+    fontChoice,
+    setFontChoice,
     textScale,
     setTextScale,
     focusMode,
@@ -71,10 +80,21 @@ export default function AccessibilityPage() {
         <RevealItem>
           <AccessibilityControl
             icon={Type}
-            title="Dyslexia-friendly font"
-            description="Switch body text to a font with wider letter spacing, shown to help some dyslexic readers."
+            title="Reading font"
+            description="Choose the typeface that's easiest for you to read — it updates across the whole platform."
             control={
-              <Switch checked={dyslexiaFont} onCheckedChange={setDyslexiaFont} aria-label="Toggle dyslexia-friendly font" />
+              <Select value={fontChoice} onValueChange={(v) => setFontChoice(v as FontChoice)}>
+                <SelectTrigger className="w-52" aria-label="Choose reading font">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             }
           />
         </RevealItem>

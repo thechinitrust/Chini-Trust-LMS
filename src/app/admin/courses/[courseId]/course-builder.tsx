@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RichText } from "@/components/shared/rich-text";
 import { SortableList, SortableItem, DragHandle } from "@/components/admin/sortable-list";
 import { CourseDetailsForm } from "./course-details-form";
 import { ModuleDialog, type ModuleDraft } from "./module-dialog";
@@ -187,7 +188,7 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
           youtubeVideoId: videoId,
           thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
           durationSeconds: values.durationSeconds,
-          objectives: values.objectives,
+          objectives: values.objectives.map((o) => o.trim()).filter(Boolean),
         };
         const updated = await updateLesson(supabase, target.id, input);
         setModules((prev) =>
@@ -208,7 +209,7 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
           youtubeVideoId: videoId,
           thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
           durationSeconds: values.durationSeconds,
-          objectives: values.objectives,
+          objectives: values.objectives.map((o) => o.trim()).filter(Boolean),
         };
         const created = await createLesson(supabase, input);
         setModules((prev) => prev.map((m) => (m.id === courseModule.id ? { ...m, lessons: [...m.lessons, created] } : m)));
@@ -379,7 +380,7 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
                         {expandedIds.has(courseModule.id) && (
                           <CardContent className="border-t border-border pt-4">
                             {courseModule.description && (
-                              <p className="mb-4 text-sm text-muted-foreground">{courseModule.description}</p>
+                              <RichText html={courseModule.description} className="mb-4 text-sm text-muted-foreground" />
                             )}
 
                             {courseModule.lessons.length === 0 ? (

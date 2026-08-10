@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist, Geist_Mono } from "next/font/google";
+import { Atkinson_Hyperlegible, Fraunces, Geist, Geist_Mono, Lato, Lexend } from "next/font/google";
 
 import "@/app/globals.css";
 import { Providers } from "@/components/providers";
@@ -27,6 +27,29 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+/* Accessibility: alternate reading fonts offered on /accessibility (see
+   AccessibilityProvider's `fontChoice`) — loaded here so next/font can
+   self-host them, same as the fonts above. */
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-lato",
+  display: "swap",
+});
+
+const atkinsonHyperlegible = Atkinson_Hyperlegible({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-atkinson",
+  display: "swap",
+});
+
+const lexend = Lexend({
+  subsets: ["latin"],
+  variable: "--font-lexend",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "CHINI Learn | The Chini Trust",
@@ -50,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${lato.variable} ${atkinsonHyperlegible.variable} ${lexend.variable}`}
     >
       <body>
         <Providers>

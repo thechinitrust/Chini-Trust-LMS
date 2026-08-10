@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { YouTubeEmbedPlayer } from "@/components/shared/youtube-embed-player";
+import { RichText } from "@/components/shared/rich-text";
 import { CourseModuleAccordion } from "@/components/shared/course-module-accordion";
 import { Reveal } from "@/components/motion/reveal";
 import { CourseEnrollPanel } from "./course-enroll-panel";
@@ -145,7 +146,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
 
           <div className="mt-10">
             <h2 className="font-serif text-2xl text-foreground">About this course</h2>
-            <p className="mt-3 leading-relaxed text-muted-foreground">{course.description}</p>
+            <RichText html={course.description} className="mt-3 leading-relaxed text-muted-foreground" />
           </div>
 
           <div className="mt-10">

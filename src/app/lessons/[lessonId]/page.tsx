@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ModuleList } from "@/components/shared/module-list";
 import { ProgressBar } from "@/components/shared/progress-bar";
+import { RichText } from "@/components/shared/rich-text";
 import { Reveal } from "@/components/motion/reveal";
 import { LessonPlayer } from "./lesson-player";
 
@@ -127,7 +128,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
                   <NotebookText className="size-4 text-primary" strokeWidth={1.5} aria-hidden="true" />
                   <h2 className="text-sm font-semibold text-foreground">Notes &amp; summary</h2>
                 </div>
-                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{lesson.notes}</p>
+                <RichText html={lesson.notes} className="mt-2.5 text-sm leading-relaxed text-muted-foreground" />
               </CardContent>
             </Card>
           )}

@@ -10,6 +10,7 @@ import { notify } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { YouTubeEmbedPlayer } from "@/components/shared/youtube-embed-player";
+import { RichText } from "@/components/shared/rich-text";
 
 interface LessonPlayerProps {
   lessonId: string;
@@ -105,7 +106,7 @@ export function LessonPlayer({
         <div className="min-w-0">
           <p className="text-xs font-medium tracking-widest text-primary-text uppercase">{lessonPosition}</p>
           <h1 className="mt-2 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">{title}</h1>
-          <p className="mt-3 max-w-2xl leading-relaxed text-muted-foreground">{description}</p>
+          <RichText html={description} className="mt-3 max-w-2xl leading-relaxed text-muted-foreground" />
         </div>
         {userId ? (
           completed ? (

@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormField } from "@/components/admin/form-field";
 import { CategoryInput } from "@/components/admin/category-input";
 import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { ObjectivesEditor } from "@/components/admin/objectives-editor";
 
 const AUDIENCE_OPTIONS: { value: AudienceTag; label: string }[] = [
   { value: "students", label: "Students" },
@@ -83,6 +85,7 @@ export function CourseDetailsForm({ course }: { course: Course }) {
       const input: CourseInput = {
         ...draft,
         previewVideoId: trimmedPreview ? extractYouTubeId(trimmedPreview) : undefined,
+        objectives: draft.objectives.map((o) => o.trim()).filter(Boolean),
       };
       await updateCourse(supabase, course.id, input);
       setDraft(input);
@@ -159,12 +162,12 @@ export function CourseDetailsForm({ course }: { course: Course }) {
           />
         </FormField>
 
-        <FormField label="Description" htmlFor="course-description">
-          <Textarea
+        <FormField label="About this course" htmlFor="course-description">
+          <RichTextEditor
             id="course-description"
             value={draft.description}
-            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-            rows={4}
+            onChange={(html) => setDraft({ ...draft, description: html })}
+            placeholder="What learners will find on the course page..."
           />
         </FormField>
 
@@ -223,21 +226,12 @@ export function CourseDetailsForm({ course }: { course: Course }) {
           </div>
         </div>
 
-        <FormField label="Learning objectives" htmlFor="course-objectives">
-          <Textarea
-            id="course-objectives"
-            value={draft.objectives.join("\n")}
-            onChange={(e) => setDraft({ ...draft, objectives: e.target.value.split("\n") })}
-            onBlur={(e) =>
-              setDraft((prev) => ({
-                ...prev,
-                objectives: e.target.value.split("\n").map((o) => o.trim()).filter(Boolean),
-              }))
-            }
-            rows={3}
-            placeholder="One objective per line"
-          />
-        </FormField>
+        <ObjectivesEditor
+          label="Learning objectives"
+          value={draft.objectives}
+          onChange={(objectives) => setDraft({ ...draft, objectives })}
+          placeholder="e.g. Recognize common signs and strengths"
+        />
 
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <span className="text-sm font-medium text-foreground">Requires certificate</span>

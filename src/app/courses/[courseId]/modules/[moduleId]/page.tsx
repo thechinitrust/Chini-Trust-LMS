@@ -11,6 +11,7 @@ import { getResourcesForModule } from "@/lib/data/resources";
 import { getProgressForUser } from "@/lib/data/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/shared/rich-text";
 import { LessonCard } from "@/components/shared/lesson-card";
 import { Reveal } from "@/components/motion/reveal";
 
@@ -60,7 +61,7 @@ export default async function ModulePage({
         <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="font-serif text-3xl tracking-tight text-foreground sm:text-4xl">{courseModule.title}</h1>
-            <p className="mt-3 max-w-2xl text-muted-foreground">{courseModule.description}</p>
+            <RichText html={courseModule.description} className="mt-3 max-w-2xl text-muted-foreground" />
           </div>
           <Badge variant="outline">{lessons.length} lessons</Badge>
         </div>

@@ -7,6 +7,7 @@ import type { Lesson, Module } from "@/lib/types";
 import { formatDuration } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { RichText } from "@/components/shared/rich-text";
 
 interface CourseModuleAccordionProps {
   modules: Module[];
@@ -59,7 +60,7 @@ export function CourseModuleAccordion({
             </AccordionTrigger>
 
             <AccordionContent className="pb-5">
-              <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{module.description}</p>
+              <RichText html={module.description} className="mb-3 text-sm leading-relaxed text-muted-foreground" />
               <ul className="space-y-1">
                 {lessons.map((lesson) => {
                   const completed = completedLessonIds?.has(lesson.id);

@@ -1,7 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
-const COLUMNS = [
+interface FooterLink {
+  href: string;
+  label: string;
+  external?: boolean;
+}
+
+const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Platform",
     links: [
@@ -16,6 +23,7 @@ const COLUMNS = [
       { href: "/about", label: "Our mission" },
       { href: "/dashboard", label: "Your dashboard" },
       { href: "/register", label: "Create an account" },
+      { href: "https://www.chinitrust.org", label: "chinitrust.org", external: true },
     ],
   },
 ];
@@ -42,12 +50,24 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               {col.links.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-ink-foreground/80 transition-colors duration-300 hover:text-ink-glow-primary"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-ink-foreground/80 transition-colors duration-300 hover:text-ink-glow-primary"
+                    >
+                      {link.label}
+                      <ArrowUpRight className="size-3" aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-ink-foreground/80 transition-colors duration-300 hover:text-ink-glow-primary"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

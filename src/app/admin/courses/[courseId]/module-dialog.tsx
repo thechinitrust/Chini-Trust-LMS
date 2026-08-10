@@ -3,9 +3,9 @@
 import * as React from "react";
 
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 
 export interface ModuleDraft {
   title: string;
@@ -58,11 +58,11 @@ export function ModuleDialog({ open, onOpenChange, title, initialValues, onSubmi
         />
       </FormField>
       <FormField label="Description" htmlFor="module-description">
-        <Textarea
+        <RichTextEditor
           id="module-description"
           value={draft.description}
-          onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-          rows={3}
+          onChange={(html) => setDraft({ ...draft, description: html })}
+          placeholder="What this module covers..."
         />
       </FormField>
     </AdminForm>

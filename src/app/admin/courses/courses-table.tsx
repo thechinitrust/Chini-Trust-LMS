@@ -22,6 +22,7 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
 import { CategoryInput } from "@/components/admin/category-input";
 import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { EmptyState } from "@/components/shared/empty-state";
 
 function slugify(title: string) {
@@ -243,12 +244,12 @@ export function CoursesTable({
               rows={2}
             />
           </FormField>
-          <FormField label="Description" htmlFor="course-description">
-            <Textarea
+          <FormField label="About this course" htmlFor="course-description">
+            <RichTextEditor
               id="course-description"
               value={draft.description}
-              onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-              rows={4}
+              onChange={(html) => setDraft({ ...draft, description: html })}
+              placeholder="What learners will find on the course page..."
             />
           </FormField>
           <div className="grid grid-cols-2 gap-4">

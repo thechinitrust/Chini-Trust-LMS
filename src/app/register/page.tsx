@@ -81,6 +81,10 @@ export default function RegisterPage() {
             We sent a confirmation link to <strong>{confirmationSentTo}</strong>. Click it to
             activate your account, then log in.
           </p>
+          <p className="text-xs text-muted-foreground">
+            The email is sent via Supabase on our behalf — if you don&apos;t see it shortly,
+            check your spam or promotions folder.
+          </p>
         </div>
       </AuthCard>
     );

@@ -200,6 +200,7 @@ as $$
 declare
   v_user_id uuid := (select auth.uid());
   v_pass_threshold int;
+  v_course_id uuid;
   v_total int;
   v_correct int := 0;
   v_score int;
@@ -213,7 +214,7 @@ begin
     raise exception 'must be authenticated to submit a quiz attempt';
   end if;
 
-  select pass_threshold into v_pass_threshold
+  select pass_threshold, course_id into v_pass_threshold, v_course_id
   from public.quizzes where id = p_quiz_id;
 
   if v_pass_threshold is null then
@@ -250,6 +251,13 @@ begin
   insert into public.quiz_attempts (user_id, quiz_id, score, passed, answers)
   values (v_user_id, p_quiz_id, v_score, v_passed, p_answers)
   returning * into v_result;
+
+  -- A passing attempt can be the last remaining piece of course-completion
+  -- eligibility (e.g. lessons were already finished earlier), so re-run the
+  -- same check the lesson-progress path runs -- see 80_completion.sql.
+  if v_passed then
+    perform private.run_course_completion(v_user_id, v_course_id);
+  end if;
 
   return v_result;
 end;

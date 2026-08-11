@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { LessonProgress } from "@/lib/types";
 import { getLessonsForCourse } from "@/lib/data/lessons";
+import { getLatestPassingAttempt, getQuizzesForCourse } from "@/lib/data/quizzes";
 
 interface ProgressRow {
   id: string;
@@ -53,11 +54,21 @@ export async function getCourseCompletionPercent(
   userId: string,
   courseId: string
 ): Promise<number> {
-  const lessons = await getLessonsForCourse(client, courseId);
-  if (lessons.length === 0) return 0;
-  const progress = await getProgressForUser(client, userId);
-  const completed = lessons.filter((l) => progress.some((p) => p.lessonId === l.id && p.completed)).length;
-  return Math.round((completed / lessons.length) * 100);
+  const [lessons, progress, quizzes] = await Promise.all([
+    getLessonsForCourse(client, courseId),
+    getProgressForUser(client, userId),
+    getQuizzesForCourse(client, courseId),
+  ]);
+  const requiredQuizzes = quizzes.filter((q) => q.isRequired);
+  const total = lessons.length + requiredQuizzes.length;
+  if (total === 0) return 0;
+
+  const completedLessons = lessons.filter((l) => progress.some((p) => p.lessonId === l.id && p.completed)).length;
+  const passedQuizzes = (
+    await Promise.all(requiredQuizzes.map((q) => getLatestPassingAttempt(client, userId, q.id)))
+  ).filter((attempt) => attempt !== undefined).length;
+
+  return Math.round(((completedLessons + passedQuizzes) / total) * 100);
 }
 
 /**

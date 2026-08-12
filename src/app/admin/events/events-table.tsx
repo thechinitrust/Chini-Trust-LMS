@@ -8,6 +8,7 @@ import type { EventCategory, LmsEvent } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { createEvent, deleteEvent, updateEvent, type EventInput } from "@/lib/data/events";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ function emptyDraft(): EventInput {
 
 export function EventsTable({ events }: { events: LmsEvent[] }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<EventInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -90,7 +92,11 @@ export function EventsTable({ events }: { events: LmsEvent[] }) {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete event?",
+      description: `Delete "${title}"? This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await deleteEvent(supabase, id);
@@ -214,6 +220,8 @@ export function EventsTable({ events }: { events: LmsEvent[] }) {
           </div>
         </AdminForm>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

@@ -5,7 +5,6 @@ import { ArrowUpRight } from "lucide-react";
 interface FooterLink {
   href: string;
   label: string;
-  external?: boolean;
 }
 
 const COLUMNS: { title: string; links: FooterLink[] }[] = [
@@ -23,7 +22,6 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
       { href: "/about", label: "Our mission" },
       { href: "/dashboard", label: "Your dashboard" },
       { href: "/register", label: "Create an account" },
-      { href: "https://www.chinitrust.org", label: "chinitrust.org", external: true },
     ],
   },
 ];
@@ -44,35 +42,39 @@ export function Footer() {
             support neurodiversity awareness, learning and inclusion.
           </p>
         </div>
-        {COLUMNS.map((col) => (
-          <div key={col.title}>
-            <h3 className="text-xs font-medium tracking-widest text-ink-muted-foreground uppercase">{col.title}</h3>
-            <ul className="mt-4 space-y-3">
-              {col.links.map((link) => (
-                <li key={link.href}>
-                  {link.external ? (
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-ink-foreground/80 transition-colors duration-300 hover:text-ink-glow-primary"
-                    >
-                      {link.label}
-                      <ArrowUpRight className="size-3" aria-hidden="true" />
-                    </a>
-                  ) : (
+        {/* Platform + About sit in their own sub-grid so the chinitrust.org pill
+            below them can span the full width from one column's start to the other's end. */}
+        <div className="grid gap-x-12 gap-y-8 sm:col-span-2 sm:grid-cols-2">
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <h3 className="text-xs font-medium tracking-widest text-ink-muted-foreground uppercase">{col.title}</h3>
+              <ul className="mt-4 space-y-3">
+                {col.links.map((link) => (
+                  <li key={link.href}>
                     <Link
                       href={link.href}
                       className="text-sm text-ink-foreground/80 transition-colors duration-300 hover:text-ink-glow-primary"
                     >
                       {link.label}
                     </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <a
+            href="https://www.chinitrust.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center justify-between gap-3 rounded-full border border-ink-border px-5 py-3 text-sm text-ink-foreground/80 transition-colors duration-300 hover:border-ink-glow-primary hover:text-ink-glow-primary sm:col-span-2"
+          >
+            chinitrust.org
+            <ArrowUpRight
+              className="size-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
       </div>
       <div className="relative border-t border-ink-border py-6">
         <div className="container-page flex flex-col items-center justify-between gap-2 px-6 text-xs text-ink-muted-foreground sm:flex-row lg:px-12">

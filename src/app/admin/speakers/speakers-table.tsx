@@ -9,6 +9,7 @@ import type { Speaker } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { createSpeaker, deleteSpeaker, updateSpeaker, type SpeakerInput } from "@/lib/data/speakers";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,7 @@ function emptyDraft(): SpeakerInput {
 
 export function SpeakersTable({ speakers }: { speakers: Speaker[] }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<SpeakerInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -71,8 +73,11 @@ export function SpeakersTable({ speakers }: { speakers: Speaker[] }) {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete "${name}"? This removes them from every course they're linked to. This can't be undone.`))
-      return;
+    const ok = await confirm({
+      title: "Delete speaker?",
+      description: `Delete "${name}"? This removes them from every course they're linked to. This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await deleteSpeaker(supabase, id);
@@ -188,6 +193,8 @@ export function SpeakersTable({ speakers }: { speakers: Speaker[] }) {
           </FormField>
         </AdminForm>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

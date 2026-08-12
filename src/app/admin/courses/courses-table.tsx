@@ -11,6 +11,7 @@ import { categoryLabel } from "@/lib/categories";
 import { createClient } from "@/lib/supabase/client";
 import { createCourse, deleteCourse, setCoursePublished, type CourseInput } from "@/lib/data/courses";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,6 +55,7 @@ export function CoursesTable({
   moduleCounts: Record<string, number>;
 }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [draft, setDraft] = React.useState<CourseInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -93,7 +95,11 @@ export function CoursesTable({
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This also removes its modules, lessons, and quizzes. This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete course?",
+      description: `Delete "${title}"? This also removes its modules, lessons, and quizzes. This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await deleteCourse(supabase, id);
@@ -294,6 +300,8 @@ export function CoursesTable({
           </div>
         </AdminForm>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

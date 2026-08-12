@@ -9,6 +9,7 @@ import type { Course, Module, Quiz } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { createQuiz, deleteQuiz, updateQuiz, type QuizInput } from "@/lib/data/quizzes";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ export function QuizzesTable({
   questionCounts: Record<string, number>;
 }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<QuizInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -87,7 +89,11 @@ export function QuizzesTable({
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This also removes its questions and options. This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete quiz?",
+      description: `Delete "${title}"? This also removes its questions and options. This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await deleteQuiz(supabase, id);
@@ -226,6 +232,8 @@ export function QuizzesTable({
           </div>
         </AdminForm>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

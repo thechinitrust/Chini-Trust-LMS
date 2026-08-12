@@ -9,6 +9,7 @@ import type { Certificate, Course, Profile } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { issueCertificateManually, recheckCertificateEligibility, revokeCertificate } from "@/lib/data/certificates";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminTable, type AdminTableColumn } from "@/components/admin/admin-table";
@@ -25,6 +26,7 @@ export function CertificatesTable({
   courses: Course[];
 }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [draft, setDraft] = React.useState({ userId: profiles[0]?.id ?? "", courseId: courses[0]?.id ?? "" });
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -61,7 +63,12 @@ export function CertificatesTable({
   };
 
   const handleRevoke = async (id: string, learnerName: string) => {
-    if (!window.confirm(`Revoke ${learnerName}'s certificate? This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Revoke certificate?",
+      description: `Revoke ${learnerName}'s certificate? This can't be undone.`,
+      confirmLabel: "Revoke",
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await revokeCertificate(supabase, id);
@@ -167,6 +174,8 @@ export function CertificatesTable({
           </Select>
         </FormField>
       </AdminForm>
+
+      {ConfirmDialog}
     </div>
   );
 }

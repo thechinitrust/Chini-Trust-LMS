@@ -8,6 +8,7 @@ import type { Profile, UserRole } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfileRole } from "@/lib/data/users";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ function initials(name: string) {
 
 export function UsersTable({ users, currentUserId }: { users: Profile[]; currentUserId: string }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -72,7 +74,11 @@ export function UsersTable({ users, currentUserId }: { users: Profile[]; current
   };
 
   const handleRemove = async (userId: string, name: string) => {
-    if (!window.confirm(`Permanently delete ${name}'s account and all their data? This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete account?",
+      description: `Permanently delete ${name}'s account and all their data? This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const resp = await fetch("/api/admin/delete-user", {
         method: "POST",
@@ -187,6 +193,8 @@ export function UsersTable({ users, currentUserId }: { users: Profile[]; current
           </p>
         )}
       </AdminForm>
+
+      {ConfirmDialog}
     </div>
   );
 }

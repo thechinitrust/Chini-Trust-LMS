@@ -8,6 +8,7 @@ import type { AudienceTag, Course, Resource, ResourceType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { createResource, deleteResource, updateResource, type ResourceInput } from "@/lib/data/resources";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ function emptyDraft(): ResourceInput {
 
 export function ResourcesTable({ resources, courses }: { resources: Resource[]; courses: Course[] }) {
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<ResourceInput | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -87,7 +89,11 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete resource?",
+      description: `Delete "${title}"? This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       const supabase = createClient();
       await deleteResource(supabase, id);
@@ -221,6 +227,8 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
           </FormField>
         </AdminForm>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

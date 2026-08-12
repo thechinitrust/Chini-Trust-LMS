@@ -65,7 +65,7 @@ export default async function AboutPage() {
         </p>
       </Reveal>
 
-      <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
+      <div className="mx-auto mt-14 grid max-w-6xl gap-6 sm:grid-cols-2">
         {PILLARS.map((pillar, i) => {
           const isAccent = i % 2 === 1;
           return (
@@ -73,7 +73,7 @@ export default async function AboutPage() {
               <Card tone={isAccent ? "accent" : "brand"} interactive className="group flex h-full flex-row overflow-hidden">
                 <div
                   className={cn(
-                    "flex w-24 shrink-0 flex-col items-center justify-center bg-gradient-to-br text-primary-foreground transition-all duration-500 group-hover:brightness-110",
+                    "flex w-24 shrink-0 flex-col items-center justify-center bg-gradient-to-br text-primary-foreground transition-all duration-500 group-hover:brightness-110 sm:w-28",
                     isAccent ? "from-accent to-ink" : "from-primary to-ink"
                   )}
                 >

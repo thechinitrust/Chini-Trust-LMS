@@ -1,13 +1,13 @@
-import { Users, Library, Route, Accessibility } from "lucide-react";
+import { Accessibility, Clock, Wrench, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 
 const STATS = [
-  { icon: Users, value: "1 in 7", label: "people are neurodivergent" },
-  { icon: Library, value: "100+", label: "resources available" },
-  { icon: Route, value: "Personalized", label: "learning pathways" },
-  { icon: Accessibility, value: "Accessible", label: "by design, not retrofit" },
+  { icon: Accessibility, value: "Accessible", label: "Designed with different learning and access needs in mind." },
+  { icon: Clock, value: "Self-paced", label: "Learn at a pace that works for you." },
+  { icon: Wrench, value: "Practical", label: "Useful information, tools and strategies you can apply." },
+  { icon: Users, value: "Inclusive", label: "Supporting different ways of thinking, learning and communicating." },
 ];
 
 export function StatsSection() {
@@ -27,7 +27,7 @@ export function StatsSection() {
                 <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
               </span>
               <p className="font-serif text-2xl text-foreground sm:text-3xl">{value}</p>
-              <p className="text-sm text-muted-foreground">{label}</p>
+              <p className="max-w-[20rem] text-sm leading-relaxed text-balance text-muted-foreground">{label}</p>
             </RevealItem>
           );
         })}

@@ -40,8 +40,8 @@ export function Footer() {
             <span className="font-serif text-lg tracking-tight text-ink-foreground">CHINI Learn</span>
           </Link>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-muted-foreground">
-            An accessibility-first platform from The Chini Trust for neurodiversity awareness,
-            structured learning, and practical inclusive support.
+            CHINI Learn is a learning and resource platform from The Chini Trust, created to
+            support neurodiversity awareness, learning and inclusion.
           </p>
         </div>
         {COLUMNS.map((col) => (

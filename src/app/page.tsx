@@ -20,7 +20,7 @@ const FEATURES = [
   {
     icon: BookOpen,
     title: "Learning Hub",
-    description: "Structured, self-paced courses on autism, ADHD, dyslexia, and workplace inclusion.",
+    description: "Self-paced courses and learning materials covering neurodiversity, inclusion and related topics.",
     href: "/learn",
   },
   {
@@ -38,10 +38,29 @@ const FEATURES = [
 ];
 
 const AUDIENCES = [
-  { title: "Students", description: "Learn about your own strengths and how to advocate for what you need." },
-  { title: "Parents", description: "Practical guidance and toolkits for supporting your child at home." },
-  { title: "Teachers", description: "Classroom-ready strategies grounded in current research." },
-  { title: "Employers", description: "Build a genuinely inclusive workplace, one practical step at a time." },
+  {
+    title: "Students & Learners",
+    description: "Learn about neurodiversity, develop skills and find resources that support your learning.",
+  },
+  {
+    title: "Parents & Families",
+    description:
+      "Find practical information and resources to better understand and support neurodivergent people.",
+  },
+  {
+    title: "Teachers & Educators",
+    description: "Explore practical strategies for creating more inclusive learning environments.",
+  },
+  {
+    title: "Employers & Organisations",
+    description:
+      "Learn how to create more inclusive workplaces and support different ways of thinking and working.",
+  },
+  {
+    title: "Anyone Interested in Neurodiversity",
+    description:
+      "CHINI Learn is for anyone who wants to understand neurodiversity and help create a more inclusive world.",
+  },
 ];
 
 import { MagneticButton } from "@/components/motion/magnetic-button";
@@ -61,11 +80,11 @@ export default async function HomePage() {
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium tracking-widest text-primary-text uppercase">What&apos;s inside</p>
           <h2 className="mt-4 font-serif text-4xl tracking-tight text-foreground sm:text-5xl">
-            <SplitReveal text="One platform, three ways to grow" />
+            <SplitReveal text="Explore CHINI Learn" />
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            CHINI Learn brings structured learning, curated resources, and
-            accessibility tools together in one accessible, evidence-based platform.
+            Explore courses, resources and practical tools to learn about
+            neurodiversity and support inclusion.
           </p>
         </Reveal>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -115,11 +134,13 @@ export default async function HomePage() {
       <section className="container-page px-6 py-24 lg:px-12">
         <Reveal className="flex flex-wrap items-end justify-between gap-4" variant="scale">
           <div>
-            <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Free downloads</p>
+            <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Resources</p>
             <h2 className="mt-3 font-serif text-3xl text-foreground sm:text-4xl">
               <SplitReveal text="Featured resources" />
             </h2>
-            <p className="mt-2 text-muted-foreground">Free, downloadable guides you can use today.</p>
+            <p className="mt-2 max-w-xl text-muted-foreground">
+              Practical guides, tools and resources to help you learn and put ideas into practice.
+            </p>
           </div>
           <MagneticButton>
             <Button variant="outline" asChild>
@@ -150,8 +171,11 @@ export default async function HomePage() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {AUDIENCES.map((a, i) => {
               const isAccent = i % 2 === 1;
+              // The final "anyone" card is a catch-all, so it spans the full row
+              // rather than leaving three empty columns beside it.
+              const isLast = i === AUDIENCES.length - 1;
               return (
-                <TiltCard key={a.title}>
+                <TiltCard key={a.title} className={cn(isLast && "sm:col-span-2 lg:col-span-4")}>
                   <Card tone={isAccent ? "accent" : "brand"} interactive className="h-full">
                     <CardContent className="p-6">
                       <span
@@ -163,7 +187,14 @@ export default async function HomePage() {
                         {i + 1}
                       </span>
                       <h3 className="font-semibold text-foreground">{a.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.description}</p>
+                      <p
+                        className={cn(
+                          "mt-2 text-sm leading-relaxed text-muted-foreground",
+                          isLast && "max-w-2xl"
+                        )}
+                      >
+                        {a.description}
+                      </p>
                     </CardContent>
                   </Card>
                 </TiltCard>

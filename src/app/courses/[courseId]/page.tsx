@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Award, BookOpen, CheckCircle2, Clock, Layers, ListChecks, PlayCircle } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CheckCircle2, Clock, Layers, ListChecks, PlayCircle, User } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { categoryLabel } from "@/lib/categories";
@@ -10,6 +11,7 @@ import { getLessonsForCourse, getLessonsForModule } from "@/lib/data/lessons";
 import { getEnrollment } from "@/lib/data/enrollments";
 import { getCourseCompletionPercent, getProgressForUser } from "@/lib/data/progress";
 import { getLatestPassingAttempt, getQuizzesForCourse } from "@/lib/data/quizzes";
+import { getSpeakersForCourse } from "@/lib/data/speakers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,9 +41,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
   } = await supabase.auth.getUser();
   const userId = user?.id;
 
-  const [modules, lessons] = await Promise.all([
+  const [modules, lessons, speakers] = await Promise.all([
     getModulesForCourse(supabase, course.id),
     getLessonsForCourse(supabase, course.id),
+    getSpeakersForCourse(supabase, course.id),
   ]);
   const lessonsByModule = Object.fromEntries(
     await Promise.all(modules.map(async (m) => [m.id, await getLessonsForModule(supabase, m.id)] as const))
@@ -164,6 +167,40 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
               ))}
             </ul>
           </div>
+
+          {/* ---- Speakers ---- */}
+          {speakers.length > 0 && (
+            <div className="mt-10">
+              <h2 className="font-serif text-2xl text-foreground">Speakers</h2>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {speakers.map((speaker) => (
+                  <Link
+                    key={speaker.id}
+                    href={`/about?speaker=${speaker.id}#speakers`}
+                    className="group flex items-center gap-3 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-brand-hover"
+                  >
+                    <span className="relative size-9 shrink-0 overflow-hidden rounded-full bg-muted">
+                      {speaker.photoUrl ? (
+                        <Image src={speaker.photoUrl} alt="" fill className="object-cover" sizes="36px" />
+                      ) : (
+                        <span className="flex h-full items-center justify-center text-muted-foreground">
+                          <User className="size-4" strokeWidth={1.5} aria-hidden="true" />
+                        </span>
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-foreground group-hover:text-primary-text">
+                        {speaker.name}
+                      </span>
+                      {speaker.role && (
+                        <span className="block truncate text-xs text-muted-foreground">{speaker.role}</span>
+                      )}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ---- Modules ---- */}
           <div className="mt-12">

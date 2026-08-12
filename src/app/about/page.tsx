@@ -1,12 +1,14 @@
-import Image from "next/image";
+import { Suspense } from "react";
 import { Target, Eye, HeartHandshake, Rocket } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { mockTeam } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { listSpeakers } from "@/lib/data/speakers";
 import { Card, CardContent } from "@/components/ui/card";
-import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
+import { Reveal } from "@/components/motion/reveal";
 import { SplitReveal } from "@/components/motion/split-reveal";
 import { TiltCard } from "@/components/motion/tilt-card";
+import { SpeakerCarousel } from "@/components/shared/speaker-carousel";
 
 const PILLARS = [
   {
@@ -46,7 +48,10 @@ const SECTIONS = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const supabase = await createClient();
+  const speakers = await listSpeakers(supabase);
+
   return (
     <div className="container-page px-6 py-20 lg:px-12" data-focus-content="true">
       <Reveal className="mx-auto max-w-2xl text-center">
@@ -86,43 +91,26 @@ export default function AboutPage() {
         })}
       </div>
 
-      {/* ---- Team ---- */}
-      <section className="mt-24">
-        <Reveal className="mx-auto max-w-2xl text-center" variant="blur">
-          <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Our team</p>
-          <h2 className="mt-4 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
-            The people behind CHINI Learn
-          </h2>
-          <p className="mt-4 leading-relaxed text-muted-foreground">
-            A small team of educators, accessibility specialists, and community organisers.
-          </p>
-        </Reveal>
+      {/* ---- Speakers ---- */}
+      {speakers.length > 0 && (
+        <section className="mt-24">
+          <div className="mx-auto max-w-2xl animate-in fade-in slide-in-from-bottom-4 fill-mode-both text-center duration-700 ease-out">
+            <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Our speakers</p>
+            <h2 className="mt-4 font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
+              Voices behind the courses
+            </h2>
+            <p className="mt-4 leading-relaxed text-muted-foreground">
+              The educators, clinicians, and researchers who present CHINI Learn&apos;s courses and panels.
+            </p>
+          </div>
 
-        <RevealGroup className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {mockTeam.map((member) => (
-            <RevealItem key={member.id}>
-              <Card interactive className="h-full overflow-hidden text-center">
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
-                  <Image
-                    src={member.photoUrl}
-                    alt={`${member.name}, ${member.role}`}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-out hover:scale-105"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-serif text-lg text-foreground">{member.name}</h3>
-                  <p className="mt-1 text-xs font-medium tracking-wide text-primary-text uppercase">
-                    {member.role}
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
-                </CardContent>
-              </Card>
-            </RevealItem>
-          ))}
-        </RevealGroup>
-      </section>
+          <div className="mt-12">
+            <Suspense fallback={null}>
+              <SpeakerCarousel speakers={speakers} />
+            </Suspense>
+          </div>
+        </section>
+      )}
 
       <div className="mx-auto mt-24 max-w-3xl space-y-12">
         {SECTIONS.map((section) => (

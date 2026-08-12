@@ -4,11 +4,16 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
-import type { AudienceTag, Course } from "@/lib/types";
+import Image from "next/image";
+import { User } from "lucide-react";
+
+import type { AudienceTag, Course, Speaker } from "@/lib/types";
 import { extractYouTubeId } from "@/lib/youtube";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCourse, setCoursePublished, updateCourse, type CourseInput } from "@/lib/data/courses";
+import { setCourseSpeakers } from "@/lib/data/speakers";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,19 +55,37 @@ function toInput(course: Course): CourseInput {
   };
 }
 
-export function CourseDetailsForm({ course }: { course: Course }) {
+export function CourseDetailsForm({
+  course,
+  speakers,
+  initialSpeakerIds,
+}: {
+  course: Course;
+  speakers: Speaker[];
+  initialSpeakerIds: string[];
+}) {
   const router = useRouter();
   const [draft, setDraft] = React.useState<CourseInput>(() => toInput(course));
+  const [selectedSpeakerIds, setSelectedSpeakerIds] = React.useState<string[]>(initialSpeakerIds);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const { confirm, ConfirmDialog } = useConfirm();
 
-  const dirty = JSON.stringify(draft) !== JSON.stringify(toInput(course));
+  const dirty =
+    JSON.stringify(draft) !== JSON.stringify(toInput(course)) ||
+    JSON.stringify([...selectedSpeakerIds].sort()) !== JSON.stringify([...initialSpeakerIds].sort());
 
   const toggleAudience = (tag: AudienceTag) => {
     setDraft((prev) => ({
       ...prev,
       audience: prev.audience.includes(tag) ? prev.audience.filter((a) => a !== tag) : [...prev.audience, tag],
     }));
+  };
+
+  const toggleSpeaker = (speakerId: string) => {
+    setSelectedSpeakerIds((prev) =>
+      prev.includes(speakerId) ? prev.filter((id) => id !== speakerId) : [...prev, speakerId]
+    );
   };
 
   const handleSave = async () => {
@@ -87,7 +110,10 @@ export function CourseDetailsForm({ course }: { course: Course }) {
         previewVideoId: trimmedPreview ? extractYouTubeId(trimmedPreview) : undefined,
         objectives: draft.objectives.map((o) => o.trim()).filter(Boolean),
       };
-      await updateCourse(supabase, course.id, input);
+      await Promise.all([
+        updateCourse(supabase, course.id, input),
+        setCourseSpeakers(supabase, course.id, selectedSpeakerIds),
+      ]);
       setDraft(input);
       notify.success("Course details saved");
       router.refresh();
@@ -113,8 +139,11 @@ export function CourseDetailsForm({ course }: { course: Course }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`Delete "${course.title}"? This also removes its modules, lessons, and quizzes. This can't be undone.`))
-      return;
+    const ok = await confirm({
+      title: "Delete course?",
+      description: `Delete "${course.title}"? This also removes its modules, lessons, and quizzes. This can't be undone.`,
+    });
+    if (!ok) return;
     setIsDeleting(true);
     try {
       const supabase = createClient();
@@ -226,6 +255,46 @@ export function CourseDetailsForm({ course }: { course: Course }) {
           </div>
         </div>
 
+        <div className="space-y-1.5">
+          <Label>Speakers</Label>
+          {speakers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No speakers yet — add some in{" "}
+              <a href="/admin/speakers" className="underline underline-offset-2">
+                Speaker Management
+              </a>
+              .
+            </p>
+          ) : (
+            <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+              {speakers.map((speaker) => (
+                <label
+                  key={speaker.id}
+                  className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground hover:bg-muted"
+                >
+                  <Checkbox
+                    checked={selectedSpeakerIds.includes(speaker.id)}
+                    onCheckedChange={() => toggleSpeaker(speaker.id)}
+                  />
+                  <span className="relative size-7 shrink-0 overflow-hidden rounded-full bg-muted">
+                    {speaker.photoUrl ? (
+                      <Image src={speaker.photoUrl} alt="" fill className="object-cover" sizes="28px" />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-muted-foreground">
+                        <User className="size-3.5" strokeWidth={1.5} aria-hidden="true" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{speaker.name}</span>
+                    {speaker.role && <span className="block truncate text-xs text-muted-foreground">{speaker.role}</span>}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
         <ObjectivesEditor
           label="Learning objectives"
           value={draft.objectives}
@@ -251,6 +320,7 @@ export function CourseDetailsForm({ course }: { course: Course }) {
           </Button>
         </div>
       </CardContent>
+      {ConfirmDialog}
     </Card>
   );
 }

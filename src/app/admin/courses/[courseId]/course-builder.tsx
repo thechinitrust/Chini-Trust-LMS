@@ -14,7 +14,7 @@ import {
   Youtube,
 } from "lucide-react";
 
-import type { Course, Lesson, Module } from "@/lib/types";
+import type { Course, Lesson, Module, Speaker } from "@/lib/types";
 import { extractYouTubeId, formatDuration } from "@/lib/youtube";
 import { createClient } from "@/lib/supabase/client";
 import { createModule, deleteModule, reorderModules, updateModule, type ModuleInput } from "@/lib/data/modules";
@@ -26,6 +26,7 @@ import {
   type LessonInput,
 } from "@/lib/data/lessons";
 import { notify } from "@/lib/toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,7 +61,17 @@ const emptyLessonDraft: LessonDraft = {
   objectives: [],
 };
 
-export function CourseBuilder({ course, initialModules }: { course: Course; initialModules: ModuleWithLessons[] }) {
+export function CourseBuilder({
+  course,
+  initialModules,
+  speakers,
+  initialSpeakerIds,
+}: {
+  course: Course;
+  initialModules: ModuleWithLessons[];
+  speakers: Speaker[];
+  initialSpeakerIds: string[];
+}) {
   const router = useRouter();
   const supabase = React.useMemo(() => createClient(), []);
   const [modules, setModules] = React.useState<ModuleWithLessons[]>(initialModules);
@@ -73,6 +84,7 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
     moduleId: null,
     lessonId: null,
   });
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const toggleExpanded = (moduleId: string) => {
     setExpandedIds((prev) => {
@@ -123,7 +135,11 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
   };
 
   const handleDeleteModule = async (courseModule: ModuleWithLessons) => {
-    if (!window.confirm(`Delete "${courseModule.title}"? This also removes its lessons. This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete module?",
+      description: `Delete "${courseModule.title}"? This also removes its lessons. This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       await deleteModule(supabase, courseModule.id);
       setModules((prev) => prev.filter((m) => m.id !== courseModule.id));
@@ -223,7 +239,11 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
   };
 
   const handleDeleteLesson = async (courseModule: ModuleWithLessons, lesson: Lesson) => {
-    if (!window.confirm(`Delete "${lesson.title}"? This can't be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete lesson?",
+      description: `Delete "${lesson.title}"? This can't be undone.`,
+    });
+    if (!ok) return;
     try {
       await deleteLesson(supabase, lesson.id);
       setModules((prev) =>
@@ -314,7 +334,7 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
       </div>
 
       <div className="mt-8 space-y-8">
-        <CourseDetailsForm course={course} />
+        <CourseDetailsForm course={course} speakers={speakers} initialSpeakerIds={initialSpeakerIds} />
 
         <div>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -485,6 +505,8 @@ export function CourseBuilder({ course, initialModules }: { course: Course; init
         onSubmit={handleLessonSubmit}
         submitLabel="Save lesson"
       />
+
+      {ConfirmDialog}
     </div>
   );
 }

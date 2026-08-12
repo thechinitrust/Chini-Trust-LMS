@@ -175,16 +175,16 @@ export interface ChatMessage {
   createdAt: string;
 }
 
-/**
- * Placeholder team profile shown on the About page. Swap `name`, `role`,
- * `bio` and `photoUrl` for real staff details when they're available.
- */
-export interface TeamMember {
+/** A course panelist/presenter shown on the About page and, optionally,
+ *  linked to one or more courses via the course_speakers join table. */
+export interface Speaker {
   id: string;
   name: string;
   role: string;
+  organization: string;
   bio: string;
   photoUrl: string;
+  createdAt: string;
 }
 
 export type EventCategory = "webinar" | "deadline" | "live-qa" | "announcement";

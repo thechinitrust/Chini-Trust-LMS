@@ -11,6 +11,7 @@ import {
   Users,
   Award,
   CalendarDays,
+  Mic2,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 const ADMIN_LINKS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
+  { href: "/admin/speakers", label: "Speakers", icon: Mic2 },
   { href: "/admin/resources", label: "Resources", icon: FileText },
   { href: "/admin/quizzes", label: "Quizzes", icon: ListChecks },
   { href: "/admin/events", label: "Events", icon: CalendarDays },

@@ -13,6 +13,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminTable, type AdminTableColumn } from "@/components/admin/admin-table";
@@ -116,7 +117,15 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
   };
 
   const columns: AdminTableColumn<Resource>[] = [
-    { header: "Title", cell: (r) => <span className="font-medium text-foreground">{r.title}</span> },
+    {
+      header: "Title",
+      cell: (r) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium text-foreground">{r.title}</span>
+          {r.featured && <Badge variant="brand">Featured</Badge>}
+        </div>
+      ),
+    },
     { header: "Type", cell: (r) => <Badge variant="outline" className="uppercase">{r.type}</Badge> },
     {
       header: "Audience",
@@ -241,6 +250,16 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
               placeholder="/resources/example.pdf"
             />
           </FormField>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <span className="text-sm font-medium text-foreground">Feature on homepage</span>
+              <p className="text-xs text-muted-foreground">The homepage shows the 3 newest featured resources.</p>
+            </div>
+            <Switch
+              checked={draft.featured}
+              onCheckedChange={(checked) => setDraft({ ...draft, featured: checked })}
+            />
+          </div>
         </AdminForm>
       )}
 

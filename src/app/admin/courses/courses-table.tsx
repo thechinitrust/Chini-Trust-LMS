@@ -4,12 +4,19 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ImageOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { ImageOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 
 import type { Course } from "@/lib/types";
 import { categoryLabel } from "@/lib/categories";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { createCourse, deleteCourse, setCoursePublished, type CourseInput } from "@/lib/data/courses";
+import {
+  createCourse,
+  deleteCourse,
+  setCourseFeatured,
+  setCoursePublished,
+  type CourseInput,
+} from "@/lib/data/courses";
 import { notify } from "@/lib/toast";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +30,7 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { FormField } from "@/components/admin/form-field";
 import { CategoryInput } from "@/components/admin/category-input";
 import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
+import { CertificateTemplateUpload } from "@/components/admin/certificate-template-upload";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { EmptyState } from "@/components/shared/empty-state";
 
@@ -43,7 +51,10 @@ function emptyDraft(): CourseInput {
     level: "beginner",
     objectives: [],
     requiresCertificate: true,
+    certificateTextTone: "light",
+    certificateTextOffset: 0,
     published: false,
+    featured: false,
   };
 }
 
@@ -120,6 +131,18 @@ export function CoursesTable({
     }
   };
 
+  const toggleFeatured = async (course: Course) => {
+    const next = !course.featured;
+    try {
+      const supabase = createClient();
+      await setCourseFeatured(supabase, course.id, next);
+      notify.success(next ? "Featured on the homepage" : "Removed from the homepage");
+      router.refresh();
+    } catch (error) {
+      notify.error("Couldn't update featured status", error instanceof Error ? error.message : undefined);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -161,18 +184,36 @@ export function CoursesTable({
                       {categoryLabel(course.category)}
                     </Badge>
                   </div>
-                  <button
-                    onClick={() => togglePublished(course)}
-                    className="absolute right-3 top-3"
-                    aria-label="Toggle published status"
-                  >
-                    <Badge
-                      variant={course.published ? "success" : "outline"}
-                      className="bg-background/90 backdrop-blur"
+                  <div className="absolute right-3 top-3 flex items-center gap-2">
+                    <button
+                      onClick={() => toggleFeatured(course)}
+                      className="flex size-7 items-center justify-center rounded-full bg-background/90 backdrop-blur"
+                      aria-pressed={course.featured}
+                      aria-label={
+                        course.featured
+                          ? `Remove ${course.title} from the homepage`
+                          : `Feature ${course.title} on the homepage`
+                      }
+                      title={course.featured ? "Featured on the homepage" : "Feature on the homepage"}
                     >
-                      {course.published ? "Published" : "Draft"}
-                    </Badge>
-                  </button>
+                      <Star
+                        className={cn(
+                          "size-4",
+                          course.featured ? "fill-current text-primary-text" : "text-muted-foreground"
+                        )}
+                        strokeWidth={1.5}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <button onClick={() => togglePublished(course)} aria-label="Toggle published status">
+                      <Badge
+                        variant={course.published ? "success" : "outline"}
+                        className="bg-background/90 backdrop-blur"
+                      >
+                        {course.published ? "Published" : "Draft"}
+                      </Badge>
+                    </button>
+                  </div>
                 </div>
 
                 <CardContent className="flex flex-1 flex-col gap-3 p-5">
@@ -292,10 +333,45 @@ export function CoursesTable({
             />
           </FormField>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <span className="text-sm font-medium text-foreground">Requires certificate</span>
+            <Switch
+              checked={draft.requiresCertificate}
+              onCheckedChange={(checked) => setDraft({ ...draft, requiresCertificate: checked })}
+            />
+          </div>
+          {draft.requiresCertificate && (
+            <CertificateTemplateUpload
+              courseTitle={draft.title}
+              value={{
+                templateUrl: draft.certificateTemplateUrl,
+                textTone: draft.certificateTextTone,
+                textOffset: draft.certificateTextOffset,
+              }}
+              onChange={(next) =>
+                setDraft({
+                  ...draft,
+                  certificateTemplateUrl: next.templateUrl,
+                  certificateTextTone: next.textTone,
+                  certificateTextOffset: next.textOffset,
+                })
+              }
+            />
+          )}
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <span className="text-sm font-medium text-foreground">Published</span>
             <Switch
               checked={draft.published}
               onCheckedChange={(checked) => setDraft({ ...draft, published: checked })}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <span className="text-sm font-medium text-foreground">Feature on homepage</span>
+              <p className="text-xs text-muted-foreground">Shows in the homepage row once published.</p>
+            </div>
+            <Switch
+              checked={draft.featured}
+              onCheckedChange={(checked) => setDraft({ ...draft, featured: checked })}
             />
           </div>
         </AdminForm>

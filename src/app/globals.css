@@ -484,6 +484,79 @@
   box-shadow: var(--shadow-soft);
 }
 
+/* --- Print -------------------------------------------------------------
+   Written for the certificate page (/certificates/[id]), the only page users
+   are invited to print. Without this the browser printed the navbar, footer
+   and page chrome alongside the certificate. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  html,
+  body {
+    background: #ffffff;
+  }
+
+  /* Site chrome is hidden at the component level with `print:hidden` --
+     Navbar, Footer, FocusModeBar, ReadAloudControl, and the certificate's own
+     action buttons.
+
+     Let the certificate own the sheet: drop the page's padding, max-width and
+     elevation so it isn't printed as a small floating card. */
+  main {
+    padding: 0 !important;
+  }
+
+  #certificate-print-area {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  /* Uploaded artwork is the certificate -- force the browser to actually
+     print its colors instead of dropping backgrounds. */
+  #certificate-print-area[data-has-template="true"] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #certificate-print-area[data-has-template="true"] .certificate-template-image {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* The built-in design is deliberately dark on screen; on paper that would be
+     a full-bleed ink dump, so flip it to the brand's light palette. */
+  #certificate-print-area[data-has-template="false"] {
+    background: #ffffff !important;
+    color: #26251b !important;
+  }
+  #certificate-print-area[data-has-template="false"] * {
+    color: #26251b !important;
+    border-color: color-mix(in srgb, #4f4d21 35%, transparent) !important;
+  }
+  /* The guilloche/glow washes are tuned for a dark ground -- on white they'd
+     read as smudges. */
+  #certificate-print-area[data-has-template="false"] [aria-hidden="true"]:not(:has(img)) {
+    background-image: none !important;
+  }
+  #certificate-print-area[data-has-template="false"] .bg-ink-border {
+    background-color: color-mix(in srgb, #4f4d21 40%, transparent) !important;
+  }
+  /* Swap the crest for the light-surface logo, or it prints as a dark blob. */
+  #certificate-print-area[data-has-template="false"] .certificate-logo-screen {
+    display: none !important;
+  }
+  #certificate-print-area[data-has-template="false"] .certificate-logo-print {
+    display: block !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 /* Tiptap admin rich-text editor: Placeholder extension only emits the DOM
    attribute, the visual style is left to the host app. */
 .ProseMirror p.is-editor-empty:first-child::before {

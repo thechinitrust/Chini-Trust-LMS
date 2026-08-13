@@ -62,8 +62,11 @@ Open the lesson from `/learn` as a learner and confirm the video plays. If you s
 | Level | Beginner / Intermediate / Advanced |
 | Estimated minutes | Total time for the whole course |
 | Published | Off = only admins can see it |
+| Feature on homepage | On = shown in the homepage's **Featured courses** row (the 3 newest featured ones). Only published courses appear there. |
 
 **Publish/unpublish quickly:** in the course list, click the **Published / Draft** badge to flip it. Same on the Lessons list.
+
+**Feature/unfeature quickly:** in the course list, click the ★ star on a course's image. Filled = featured. It's also a switch inside the course's own page.
 
 **Delete:** the bin icon removes the course *and all of its modules, lessons and quizzes*. There is no undo.
 
@@ -108,7 +111,9 @@ Save the quiz first. Then in the quiz list, **click the question-count badge** n
 
 ## 5. Resources (PDFs, guides, worksheets)
 
-**Admin → Resources → New resource.** Title, Summary, Type (PDF / Slides / Worksheet / Guide / Link), Audience (tick as many as apply, or type your own and press **Add**), optional related Course, and **File URL**.
+**Admin → Resources → New resource.** Title, Summary, Type (PDF / Slides / Worksheet / Guide / Link), Audience (tick as many as apply, or type your own and press **Add**), optional related Course, **File URL**, and **Feature on homepage**.
+
+**Feature on homepage** puts the resource in the homepage's *Featured resources* row — it shows the 3 newest featured ones. Resources in the list carry a **Featured** badge so you can see which are in it.
 
 > **File URL takes a link, not a file — there is no upload button yet.** Host the PDF somewhere public (Google Drive share link, the Trust website, Dropbox direct link) and paste the full `https://…` address. A path like `/resources/thing.pdf` will **not** work.
 
@@ -136,10 +141,34 @@ Save the quiz first. Then in the quiz list, **click the question-count badge** n
 
 **Admin → Certificates.** Certificates are issued **automatically** when a learner finishes all lessons and passes any *Required* quizzes.
 
-- **Issue certificate** — manually grant one (pick learner + course), for offline/exceptional cases.
-- **Eye icon** — view the certificate as the learner sees it.
-- **Refresh icon** — re-check eligibility. Use this if someone finished a course but no certificate appeared.
-- **Bin icon** — revoke.
+The page is organised as a log:
+
+- **Recently issued** — the 8 most recent certificates across all courses. Quickest way to see what's gone out.
+- **One collapsible group per course**, most recently issued first. Courses that require a certificate but haven't issued any yet still appear at the bottom, so you can set their template up in advance.
+
+Inside a course group:
+
+- **Certificate template** — the artwork for that course (see below).
+- **Issued certificates** — every certificate for that course, with:
+  - **Eye icon** — view the certificate as the learner sees it.
+  - **Pen icon** — refresh the name and course title. Certificates store the learner's name and the course title *as they were on the day it was issued*. If someone's name was corrected, or you renamed the course, use this to bring the certificate up to date. The certificate ID and original issue date don't change.
+  - **Circular-arrows icon** — re-check eligibility. Use this if someone finished a course but no certificate appeared.
+  - **Bin icon** — revoke.
+
+**Issue certificate** (top right) manually grants one — pick a learner (there's a filter box) and a course, for offline or exceptional cases.
+
+### Certificate templates
+
+Each course can have its own certificate artwork. Set it when creating a course, in **Admin → Courses → [course]**, or from that course's group here — all three edit the same thing.
+
+- Leave it empty to use the **built-in CHINI Learn design** — a dark, Chini-Trust-branded certificate. It prints on white paper automatically.
+- Or **upload artwork** to override it: **A4 landscape**, JPG/PNG/WEBP, **up to 2MB**.
+
+> **Leave the middle of your artwork blank.** The learner's name, the course title, the issue date and the certificate ID are drawn on top by the site — so the file you upload should be a blank form, with no name on it. One template serves every learner on that course.
+
+After uploading, use **Text colour** (light or dark, whichever reads against your artwork) and **Vertical position** to slide the text into the blank area. The preview above the buttons is the real certificate with a sample name, so what you line up is exactly what learners get. Press **Save template** when it looks right.
+
+Learners open a certificate from their dashboard and can print it or save it as a PDF from their browser — the site chrome is stripped out, and the page prints A4 landscape.
 
 ---
 

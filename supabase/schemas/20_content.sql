@@ -15,7 +15,21 @@ create table public.courses (
   level text not null default 'beginner' check (level in ('beginner', 'intermediate', 'advanced')),
   objectives text[] not null default '{}',
   requires_certificate boolean not null default true,
+  -- Per-course certificate artwork. Null means "use the built-in placeholder
+  -- design". The uploaded file is a blank form -- the app always draws the
+  -- learner name / course title / issue date / certificate id on top of it.
+  certificate_template_url text,
+  -- Whether that overlaid text renders light or dark, so it reads against
+  -- either pale or dark artwork.
+  certificate_text_tone text not null default 'light'
+    check (certificate_text_tone in ('light', 'dark')),
+  -- Vertical nudge (percent) aligning the text block with the blank name area
+  -- of whatever artwork was uploaded.
+  certificate_text_offset smallint not null default 0
+    check (certificate_text_offset between -25 and 25),
   published boolean not null default false,
+  -- Picked out on the homepage's "Featured courses" row; ignored while draft.
+  featured boolean not null default false,
   preview_video_id text,
   created_by uuid references public.profiles (id) on delete set null,
   created_at timestamptz not null default now(),
@@ -320,3 +334,33 @@ create policy "speaker_photo_objects_admin_delete"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'speaker-photos' and private.is_admin());
+
+-- Public bucket: per-course certificate artwork, loaded directly by the
+-- learner's browser as the backdrop of their certificate page. Blank forms,
+-- not learner data. 2MB because this artwork is print-resolution.
+-- Distinct from the private 'certificates' bucket in 50_certificates.sql,
+-- which is reserved for the future rendered-PDF work.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('certificate-templates', 'certificate-templates', true, 2097152, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update set file_size_limit = excluded.file_size_limit;
+
+create policy "certificate_template_objects_select_public"
+  on storage.objects for select
+  to anon, authenticated
+  using (bucket_id = 'certificate-templates');
+
+create policy "certificate_template_objects_admin_insert"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'certificate-templates' and private.is_admin());
+
+create policy "certificate_template_objects_admin_update"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'certificate-templates' and private.is_admin())
+  with check (bucket_id = 'certificate-templates' and private.is_admin());
+
+create policy "certificate_template_objects_admin_delete"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'certificate-templates' and private.is_admin());

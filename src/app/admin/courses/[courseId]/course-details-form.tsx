@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormField } from "@/components/admin/form-field";
 import { CategoryInput } from "@/components/admin/category-input";
 import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
+import { CertificateTemplateUpload } from "@/components/admin/certificate-template-upload";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { ObjectivesEditor } from "@/components/admin/objectives-editor";
 
@@ -44,7 +45,11 @@ function toInput(course: Course): CourseInput {
     objectives: course.objectives,
     requiresCertificate: course.requiresCertificate,
     published: course.published,
+    featured: course.featured,
     previewVideoId: course.previewVideoId,
+    certificateTemplateUrl: course.certificateTemplateUrl,
+    certificateTextTone: course.certificateTextTone,
+    certificateTextOffset: course.certificateTextOffset,
   };
 }
 
@@ -296,12 +301,46 @@ export function CourseDetailsForm({
         />
 
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <span className="text-sm font-medium text-foreground">Feature on homepage</span>
+            <p className="text-xs text-muted-foreground">
+              {draft.published
+                ? "Shows in the homepage's featured courses row."
+                : "Takes effect once the course is published."}
+            </p>
+          </div>
+          <Switch
+            checked={draft.featured}
+            onCheckedChange={(checked) => setDraft({ ...draft, featured: checked })}
+          />
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <span className="text-sm font-medium text-foreground">Requires certificate</span>
           <Switch
             checked={draft.requiresCertificate}
             onCheckedChange={(checked) => setDraft({ ...draft, requiresCertificate: checked })}
           />
         </div>
+
+        {draft.requiresCertificate && (
+          <CertificateTemplateUpload
+            courseTitle={draft.title}
+            value={{
+              templateUrl: draft.certificateTemplateUrl,
+              textTone: draft.certificateTextTone,
+              textOffset: draft.certificateTextOffset,
+            }}
+            onChange={(next) =>
+              setDraft({
+                ...draft,
+                certificateTemplateUrl: next.templateUrl,
+                certificateTextTone: next.textTone,
+                certificateTextOffset: next.textOffset,
+              })
+            }
+          />
+        )}
 
         <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
           <Button type="button" variant="ghost" onClick={handleDelete} disabled={isDeleting}>

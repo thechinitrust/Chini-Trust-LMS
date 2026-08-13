@@ -28,7 +28,10 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-ink-mesh text-ink-foreground" data-focus-hide="true">
+    <footer
+      className="relative overflow-hidden bg-ink-mesh text-ink-foreground print:hidden"
+      data-focus-hide="true"
+    >
       <div className="container-page relative grid gap-12 px-6 py-20 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
         <div className="sm:col-span-2">
           <Link href="/" className="group flex items-center gap-2.5">

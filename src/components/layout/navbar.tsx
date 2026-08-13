@@ -56,7 +56,7 @@ export function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-40 glass"
+      className="sticky top-0 z-40 glass print:hidden"
       data-focus-hide="true"
     >
       <div className="container-page flex h-20 items-center justify-between gap-4 px-6 lg:px-12">

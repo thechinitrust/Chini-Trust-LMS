@@ -16,7 +16,11 @@ interface CourseRow {
   objectives: string[];
   requires_certificate: boolean;
   published: boolean;
+  featured: boolean;
   preview_video_id: string | null;
+  certificate_template_url: string | null;
+  certificate_text_tone: string;
+  certificate_text_offset: number;
   created_at: string;
 }
 
@@ -35,13 +39,17 @@ function mapCourse(row: CourseRow): Course {
     objectives: row.objectives,
     requiresCertificate: row.requires_certificate,
     published: row.published,
+    featured: row.featured,
     createdAt: row.created_at,
     previewVideoId: row.preview_video_id ?? undefined,
+    certificateTemplateUrl: row.certificate_template_url ?? undefined,
+    certificateTextTone: row.certificate_text_tone as Course["certificateTextTone"],
+    certificateTextOffset: row.certificate_text_offset,
   };
 }
 
 const COURSE_COLUMNS =
-  "id, slug, title, description, summary, category, audience, thumbnail_url, estimated_minutes, level, objectives, requires_certificate, published, preview_video_id, created_at";
+  "id, slug, title, description, summary, category, audience, thumbnail_url, estimated_minutes, level, objectives, requires_certificate, published, featured, preview_video_id, certificate_template_url, certificate_text_tone, certificate_text_offset, created_at";
 
 /**
  * Every course visible to the caller -- RLS decides *which* rows come back
@@ -90,7 +98,11 @@ export interface CourseInput {
   objectives: string[];
   requiresCertificate: boolean;
   published: boolean;
+  featured: boolean;
   previewVideoId?: string;
+  certificateTemplateUrl?: string;
+  certificateTextTone: Course["certificateTextTone"];
+  certificateTextOffset: number;
 }
 
 export async function createCourse(client: SupabaseClient, input: CourseInput): Promise<Course> {
@@ -109,7 +121,11 @@ export async function createCourse(client: SupabaseClient, input: CourseInput): 
       objectives: input.objectives,
       requires_certificate: input.requiresCertificate,
       published: input.published,
+      featured: input.featured,
       preview_video_id: input.previewVideoId ?? null,
+      certificate_template_url: input.certificateTemplateUrl ?? null,
+      certificate_text_tone: input.certificateTextTone,
+      certificate_text_offset: input.certificateTextOffset,
     })
     .select(COURSE_COLUMNS)
     .single();
@@ -137,7 +153,11 @@ export async function updateCourse(
       objectives: input.objectives,
       requires_certificate: input.requiresCertificate,
       published: input.published,
+      featured: input.featured,
       preview_video_id: input.previewVideoId ?? null,
+      certificate_template_url: input.certificateTemplateUrl ?? null,
+      certificate_text_tone: input.certificateTextTone,
+      certificate_text_offset: input.certificateTextOffset,
     })
     .eq("id", id)
     .select(COURSE_COLUMNS)
@@ -146,12 +166,47 @@ export async function updateCourse(
   return mapCourse(data as CourseRow);
 }
 
+/**
+ * Narrow update for just the certificate-artwork fields, so the admin
+ * certificates page can change a course's template without holding (and
+ * round-tripping) a whole CourseInput the way updateCourse requires.
+ */
+export async function updateCourseCertificateTemplate(
+  client: SupabaseClient,
+  id: string,
+  input: {
+    templateUrl?: string;
+    textTone: Course["certificateTextTone"];
+    textOffset: number;
+  }
+): Promise<void> {
+  const { error } = await client
+    .from("courses")
+    .update({
+      certificate_template_url: input.templateUrl ?? null,
+      certificate_text_tone: input.textTone,
+      certificate_text_offset: input.textOffset,
+    })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function setCoursePublished(
   client: SupabaseClient,
   id: string,
   published: boolean
 ): Promise<void> {
   const { error } = await client.from("courses").update({ published }).eq("id", id);
+  if (error) throw error;
+}
+
+/** Narrow update behind the star toggle on the admin course cards. */
+export async function setCourseFeatured(
+  client: SupabaseClient,
+  id: string,
+  featured: boolean
+): Promise<void> {
+  const { error } = await client.from("courses").update({ featured }).eq("id", id);
   if (error) throw error;
 }
 

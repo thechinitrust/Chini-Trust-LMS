@@ -44,13 +44,28 @@ export interface Course {
   objectives: string[];
   requiresCertificate: boolean;
   published: boolean;
+  /** Shown in the homepage "Featured courses" row (published courses only). */
+  featured: boolean;
   createdAt: string;
   /**
    * Optional course-level intro/trailer video shown at the top of the course
    * page. When unset the course page falls back to the first lesson's video.
    */
   previewVideoId?: string;
+  /**
+   * Artwork used as the backdrop of this course's certificate. Unset means the
+   * built-in placeholder design. The uploaded file is a blank form -- the
+   * learner name, course title, issue date and certificate id are always drawn
+   * on top of it, never baked in.
+   */
+  certificateTemplateUrl?: string;
+  /** Whether that overlaid text reads light or dark against the artwork. */
+  certificateTextTone: CertificateTextTone;
+  /** Vertical nudge (percent, -25..25) aligning the text with the artwork. */
+  certificateTextOffset: number;
 }
+
+export type CertificateTextTone = "light" | "dark";
 
 export interface Module {
   id: string;

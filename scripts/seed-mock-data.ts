@@ -83,6 +83,7 @@ async function seedCourses() {
     objectives: c.objectives,
     requires_certificate: c.requiresCertificate,
     published: c.published,
+    featured: c.featured,
     preview_video_id: c.previewVideoId ?? null,
   }));
   const inserted = await insert<{ id: string; slug: string }>("courses", rows);

@@ -51,11 +51,15 @@ export function HeroSection() {
         className="pointer-events-none absolute bottom-[-10rem] left-[10%] h-[24rem] w-[24rem] rounded-full bg-accent/8 blur-3xl"
       />
 
+      {/* Asymmetric vertical padding: the hero sits directly under the navbar, so
+          a full py-24/32 above it reads as dead space rather than breathing room.
+          The bottom keeps its full value to separate the hero from the section
+          below. */}
       <motion.div
         variants={container}
         initial="hidden"
         animate="visible"
-        className="container-page relative grid gap-16 px-6 py-24 lg:grid-cols-[1fr_1fr] lg:items-center lg:px-12 lg:py-32"
+        className="container-page relative grid gap-14 px-6 pt-10 pb-24 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:px-12 lg:pt-14 lg:pb-32"
       >
         <div>
           <motion.span
@@ -66,20 +70,49 @@ export function HeroSection() {
             The Chini Trust
           </motion.span>
 
+          {/* `text-balance` is deliberately absent: at display sizes it evens the
+              line lengths out into short ragged lines, leaving a visible gap down
+              the right of the column. Letting the lines fill naturally keeps the
+              headline reading as one solid block. */}
           <motion.h1
             variants={item}
-            className="mt-7 font-serif text-5xl leading-[1.05] tracking-tight text-balance text-foreground sm:text-6xl lg:text-7xl"
+            className="mt-7 font-serif text-5xl leading-[1.02] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
           >
-            <span className="text-primary italic">Learning</span>, your{" "}
-            <span className="text-accent-text italic">way</span>.
+            Your guide to <span className="text-primary italic">neurodiversity</span> and{" "}
+            <span className="text-accent-text italic">inclusion</span>
           </motion.h1>
 
-          <motion.p variants={item} className="mt-7 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            A space to learn about neurodiversity, build practical skills, and find
-            resources for more inclusive communities.
+          {/* The three promises are a strapline, not a paragraph -- set as a real
+              list, one step above the body copy in weight. Stacked rather than
+              run inline with separators: at these widths an inline row wraps
+              mid-list and strands a separator at the end of a line. One promise
+              per row also lets each be scanned in a single eye movement. */}
+          <motion.ul
+            variants={item}
+            className="mt-8 space-y-2.5 text-lg leading-snug font-medium text-foreground/90 sm:text-xl"
+          >
+            {["Learn at your own pace", "Discover practical tools", "Create more inclusive spaces"].map(
+              (promise) => (
+                <li key={promise} className="flex items-center gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="size-1.5 shrink-0 rounded-full bg-primary/50 ring-4 ring-primary/10"
+                  />
+                  {promise}
+                </li>
+              )
+            )}
+          </motion.ul>
+
+          <motion.p
+            variants={item}
+            className="mt-5 max-w-lg border-l-2 border-primary/20 pl-5 text-base leading-relaxed text-muted-foreground sm:text-lg"
+          >
+            Explore courses, practical resources, and accessibility tools designed for anyone
+            who wants to learn more and help everyone feel understood.
           </motion.p>
 
-          <motion.div variants={item} className="mt-10 flex flex-wrap items-center gap-4">
+          <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-4">
             <MagneticButton>
               <Button size="lg" asChild>
                 <Link href="/learn">

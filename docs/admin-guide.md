@@ -108,7 +108,7 @@ Save the quiz first. Then in the quiz list, **click the question-count badge** n
 
 ## 5. Resources (PDFs, guides, worksheets)
 
-**Admin → Resources → New resource.** Title, Summary, Type (PDF / Slides / Worksheet / Guide / Link), Audience, optional related Course, and **File URL**.
+**Admin → Resources → New resource.** Title, Summary, Type (PDF / Slides / Worksheet / Guide / Link), Audience (tick as many as apply, or type your own and press **Add**), optional related Course, and **File URL**.
 
 > **File URL takes a link, not a file — there is no upload button yet.** Host the PDF somewhere public (Google Drive share link, the Trust website, Dropbox direct link) and paste the full `https://…` address. A path like `/resources/thing.pdf` will **not** work.
 

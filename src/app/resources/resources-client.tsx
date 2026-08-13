@@ -2,27 +2,31 @@
 
 import * as React from "react";
 
-import type { AudienceTag, Resource } from "@/lib/types";
+import type { Resource } from "@/lib/types";
+import { audienceLabel } from "@/lib/audiences";
 import { ResourceCard } from "@/components/shared/resource-card";
 import { FilterTabs } from "@/components/shared/filter-tabs";
 import { SearchInput } from "@/components/shared/search-input";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 
-const CATEGORY_OPTIONS: { value: AudienceTag | "all"; label: string }[] = [
-  { value: "all", label: "All resources" },
-  { value: "parents", label: "Parents" },
-  { value: "teachers", label: "Teachers" },
-  { value: "students", label: "Students" },
-  { value: "employers", label: "Employers" },
-];
-
 export function ResourcesClient({ resources }: { resources: Resource[] }) {
-  const [category, setCategory] = React.useState<AudienceTag | "all">("all");
+  const [audience, setAudience] = React.useState<string>("all");
   const [query, setQuery] = React.useState("");
 
+  // Audiences are free text now, so the tabs come from what's actually tagged.
+  const audienceOptions = React.useMemo(() => {
+    const distinct = Array.from(new Set(resources.flatMap((r) => r.audiences))).sort((a, b) =>
+      audienceLabel(a).localeCompare(audienceLabel(b))
+    );
+    return [
+      { value: "all", label: "All resources" },
+      ...distinct.map((a) => ({ value: a, label: audienceLabel(a) })),
+    ];
+  }, [resources]);
+
   const filtered = resources.filter((resource) => {
-    const matchesCategory = category === "all" || resource.category === category;
+    const matchesCategory = audience === "all" || resource.audiences.includes(audience);
     const q = query.trim().toLowerCase();
     const matchesQuery =
       q.length === 0 || resource.title.toLowerCase().includes(q) || resource.summary.toLowerCase().includes(q);
@@ -46,7 +50,7 @@ export function ResourcesClient({ resources }: { resources: Resource[] }) {
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Search resources"
         />
-        <FilterTabs options={CATEGORY_OPTIONS} value={category} onChange={setCategory} className="justify-center" />
+        <FilterTabs options={audienceOptions} value={audience} onChange={setAudience} className="justify-center" />
       </div>
 
       {filtered.length === 0 ? (
@@ -54,7 +58,7 @@ export function ResourcesClient({ resources }: { resources: Resource[] }) {
           <EmptyState title="No resources found" description="Try a different category or search term." />
         </div>
       ) : (
-        <RevealGroup key={category} className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealGroup key={audience} className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((resource) => (
             <RevealItem key={resource.id}>
               <ResourceCard resource={resource} />

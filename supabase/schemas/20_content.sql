@@ -59,7 +59,8 @@ create table public.resources (
   title text not null,
   summary text not null default '',
   type text not null check (type in ('pdf', 'slides', 'worksheet', 'guide', 'link')),
-  category text not null check (category in ('students', 'parents', 'teachers', 'employers', 'neurodivergent-individuals')),
+  -- free text, and many per resource; admins can add audiences beyond the launch five
+  audiences text[] not null default '{}',
   file_url text not null,
   course_id uuid references public.courses (id) on delete set null,
   module_id uuid references public.modules (id) on delete set null,

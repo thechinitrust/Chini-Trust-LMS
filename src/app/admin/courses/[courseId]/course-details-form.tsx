@@ -8,6 +8,7 @@ import Image from "next/image";
 import { User } from "lucide-react";
 
 import type { AudienceTag, Course, Speaker } from "@/lib/types";
+import { AUDIENCE_SUGGESTIONS, audienceLabel } from "@/lib/audiences";
 import { extractYouTubeId } from "@/lib/youtube";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCourse, setCoursePublished, updateCourse, type CourseInput } from "@/lib/data/courses";
@@ -28,14 +29,6 @@ import { CategoryInput } from "@/components/admin/category-input";
 import { CourseThumbnailUpload } from "@/components/admin/course-thumbnail-upload";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { ObjectivesEditor } from "@/components/admin/objectives-editor";
-
-const AUDIENCE_OPTIONS: { value: AudienceTag; label: string }[] = [
-  { value: "students", label: "Students" },
-  { value: "parents", label: "Parents" },
-  { value: "teachers", label: "Teachers" },
-  { value: "employers", label: "Employers" },
-  { value: "neurodivergent-individuals", label: "Neurodivergent individuals" },
-];
 
 function toInput(course: Course): CourseInput {
   return {
@@ -243,13 +236,13 @@ export function CourseDetailsForm({
         <div className="space-y-1.5">
           <Label>Audience</Label>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            {AUDIENCE_OPTIONS.map((option) => (
-              <label key={option.value} className="flex items-center gap-2 text-sm text-foreground">
+            {AUDIENCE_SUGGESTIONS.map((option) => (
+              <label key={option} className="flex items-center gap-2 text-sm text-foreground">
                 <Checkbox
-                  checked={draft.audience.includes(option.value)}
-                  onCheckedChange={() => toggleAudience(option.value)}
+                  checked={draft.audience.includes(option)}
+                  onCheckedChange={() => toggleAudience(option)}
                 />
-                {option.label}
+                {audienceLabel(option)}
               </label>
             ))}
           </div>

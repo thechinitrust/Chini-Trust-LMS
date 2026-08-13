@@ -24,6 +24,12 @@ export type LearningCategory = string;
 
 export type AudienceTag = "students" | "parents" | "teachers" | "employers" | "neurodivergent-individuals";
 
+/**
+ * Resource audiences are free text: the AudienceTag values above are offered
+ * as suggestions, but admins can add their own (see src/lib/audiences.ts).
+ */
+export type ResourceAudience = string;
+
 export interface Course {
   id: string;
   slug: string;
@@ -82,7 +88,7 @@ export interface Resource {
   title: string;
   summary: string;
   type: ResourceType;
-  category: AudienceTag;
+  audiences: ResourceAudience[];
   fileUrl: string;
   courseId?: string;
   moduleId?: string;

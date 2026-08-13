@@ -165,7 +165,7 @@ async function seedResources(courseIdMap: Map<string, string>) {
     title: r.title,
     summary: r.summary,
     type: r.type,
-    category: r.category,
+    audiences: r.audiences,
     file_url: r.fileUrl,
     course_id: r.courseId ? must(courseIdMap.get(r.courseId), `course for resource ${r.id}`) : null,
     featured: r.featured ?? false,

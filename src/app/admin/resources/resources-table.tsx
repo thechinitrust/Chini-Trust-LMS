@@ -4,9 +4,10 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
-import type { AudienceTag, Course, Resource, ResourceType } from "@/lib/types";
+import type { Course, Resource, ResourceType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { createResource, deleteResource, updateResource, type ResourceInput } from "@/lib/data/resources";
+import { audienceLabel } from "@/lib/audiences";
 import { notify } from "@/lib/toast";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminTable, type AdminTableColumn } from "@/components/admin/admin-table";
 import { AdminForm } from "@/components/admin/admin-form";
+import { AudienceSelect } from "@/components/admin/audience-select";
 import { FormField } from "@/components/admin/form-field";
 
 const TYPES: ResourceType[] = ["pdf", "slides", "worksheet", "guide", "link"];
@@ -26,10 +28,8 @@ const TYPE_LABEL: Record<ResourceType, string> = {
   guide: "Guide",
   link: "Link",
 };
-const AUDIENCES: AudienceTag[] = ["parents", "teachers", "students", "employers", "neurodivergent-individuals"];
-
 function emptyDraft(): ResourceInput {
-  return { title: "", summary: "", type: "guide", category: "teachers", fileUrl: "", featured: false };
+  return { title: "", summary: "", type: "guide", audiences: [], fileUrl: "", featured: false };
 }
 
 export function ResourcesTable({ resources, courses }: { resources: Resource[]; courses: Course[] }) {
@@ -41,6 +41,13 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
   const [isSaving, setIsSaving] = React.useState(false);
 
   const courseTitle = (courseId?: string) => courses.find((c) => c.id === courseId)?.title ?? "—";
+
+  // Custom audiences other resources already use, so they're offered as options
+  // instead of having to be retyped for every resource.
+  const knownAudiences = React.useMemo(
+    () => Array.from(new Set(resources.flatMap((r) => r.audiences))),
+    [resources]
+  );
 
   const openCreate = () => {
     setEditingId(null);
@@ -54,7 +61,7 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
       title: resource.title,
       summary: resource.summary,
       type: resource.type,
-      category: resource.category,
+      audiences: resource.audiences,
       fileUrl: resource.fileUrl,
       courseId: resource.courseId,
       moduleId: resource.moduleId,
@@ -68,6 +75,10 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
     if (!draft) return;
     if (!draft.title.trim()) {
       notify.error("Title is required");
+      return;
+    }
+    if (draft.audiences.length === 0) {
+      notify.error("Pick at least one audience");
       return;
     }
     setIsSaving(true);
@@ -107,7 +118,22 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
   const columns: AdminTableColumn<Resource>[] = [
     { header: "Title", cell: (r) => <span className="font-medium text-foreground">{r.title}</span> },
     { header: "Type", cell: (r) => <Badge variant="outline" className="uppercase">{r.type}</Badge> },
-    { header: "Category", cell: (r) => <span className="capitalize">{r.category.replace("-", " ")}</span> },
+    {
+      header: "Audience",
+      cell: (r) =>
+        r.audiences.length === 0 ? (
+          <span className="text-muted-foreground">—</span>
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {r.audiences.slice(0, 2).map((a) => (
+              <Badge key={a} variant="secondary">
+                {audienceLabel(a)}
+              </Badge>
+            ))}
+            {r.audiences.length > 2 && <Badge variant="outline">+{r.audiences.length - 2}</Badge>}
+          </div>
+        ),
+    },
     { header: "Course", cell: (r) => courseTitle(r.courseId) },
     {
       header: "Actions",
@@ -166,39 +192,29 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
               rows={2}
             />
           </FormField>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Type" htmlFor="resource-type">
-              <Select value={draft.type} onValueChange={(v) => setDraft({ ...draft, type: v as ResourceType })}>
-                <SelectTrigger id="resource-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {TYPE_LABEL[t]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-            <FormField label="Audience" htmlFor="resource-category">
-              <Select
-                value={draft.category}
-                onValueChange={(v) => setDraft({ ...draft, category: v as AudienceTag })}
-              >
-                <SelectTrigger id="resource-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AUDIENCES.map((a) => (
-                    <SelectItem key={a} value={a} className="capitalize">
-                      {a.replace("-", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-          </div>
+          <FormField label="Type" htmlFor="resource-type">
+            <Select value={draft.type} onValueChange={(v) => setDraft({ ...draft, type: v as ResourceType })}>
+              <SelectTrigger id="resource-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {TYPE_LABEL[t]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+          <AudienceSelect
+            id="resource-audiences"
+            value={draft.audiences}
+            onChange={(audiences) => setDraft({ ...draft, audiences })}
+            knownAudiences={knownAudiences}
+          />
+          <p className="text-xs text-muted-foreground">
+            Pick every audience this resource is for, or add one of your own.
+          </p>
           <FormField label="Related course (optional)" htmlFor="resource-course">
             <Select
               value={draft.courseId ?? "none"}

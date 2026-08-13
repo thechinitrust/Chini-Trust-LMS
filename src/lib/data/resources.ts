@@ -7,7 +7,7 @@ interface ResourceRow {
   title: string;
   summary: string;
   type: string;
-  category: string;
+  audiences: string[] | null;
   file_url: string;
   course_id: string | null;
   module_id: string | null;
@@ -22,7 +22,7 @@ function mapResource(row: ResourceRow): Resource {
     title: row.title,
     summary: row.summary,
     type: row.type as Resource["type"],
-    category: row.category as Resource["category"],
+    audiences: row.audiences ?? [],
     fileUrl: row.file_url,
     courseId: row.course_id ?? undefined,
     moduleId: row.module_id ?? undefined,
@@ -33,7 +33,7 @@ function mapResource(row: ResourceRow): Resource {
 }
 
 const RESOURCE_COLUMNS =
-  "id, title, summary, type, category, file_url, course_id, module_id, lesson_id, featured, created_at";
+  "id, title, summary, type, audiences, file_url, course_id, module_id, lesson_id, featured, created_at";
 
 export async function listResources(client: SupabaseClient): Promise<Resource[]> {
   const { data, error } = await client
@@ -81,7 +81,7 @@ export interface ResourceInput {
   title: string;
   summary: string;
   type: Resource["type"];
-  category: Resource["category"];
+  audiences: Resource["audiences"];
   fileUrl: string;
   courseId?: string;
   moduleId?: string;
@@ -94,7 +94,7 @@ function toResourceRow(input: ResourceInput) {
     title: input.title,
     summary: input.summary,
     type: input.type,
-    category: input.category,
+    audiences: input.audiences,
     file_url: input.fileUrl,
     course_id: input.courseId ?? null,
     module_id: input.moduleId ?? null,

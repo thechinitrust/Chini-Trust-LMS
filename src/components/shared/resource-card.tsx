@@ -4,6 +4,7 @@ import { Download, FileText, Presentation, ClipboardList, Link as LinkIcon, Book
 import { motion } from "framer-motion";
 
 import type { Resource } from "@/lib/types";
+import { audienceLabel } from "@/lib/audiences";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,17 +50,14 @@ const TYPE_VISUAL: Record<
   },
 };
 
-const AUDIENCE_LABEL: Record<Resource["category"], string> = {
-  parents: "Parents",
-  teachers: "Teachers",
-  students: "Students",
-  employers: "Employers",
-  "neurodivergent-individuals": "Neurodivergent individuals",
-};
+/** Cards stay one line of badges — the rest of the audiences roll up into "+N". */
+const VISIBLE_AUDIENCES = 2;
 
 export function ResourceCard({ resource }: { resource: Resource }) {
   const visual = TYPE_VISUAL[resource.type];
   const Icon = visual.icon;
+  const shownAudiences = resource.audiences.slice(0, VISIBLE_AUDIENCES);
+  const hiddenAudiences = resource.audiences.slice(VISIBLE_AUDIENCES);
 
   return (
     <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="h-full">
@@ -96,7 +94,18 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           <h3 className="font-semibold leading-snug text-foreground">{resource.title}</h3>
           <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{resource.summary}</p>
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <Badge variant="secondary">{AUDIENCE_LABEL[resource.category]}</Badge>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {shownAudiences.map((audience) => (
+                <Badge key={audience} variant="secondary">
+                  {audienceLabel(audience)}
+                </Badge>
+              ))}
+              {hiddenAudiences.length > 0 && (
+                <Badge variant="outline" title={hiddenAudiences.map(audienceLabel).join(", ")}>
+                  +{hiddenAudiences.length}
+                </Badge>
+              )}
+            </div>
             <Button size="sm" variant="outline" asChild>
               <a href={resource.fileUrl} download>
                 <Download className="size-4" strokeWidth={1.5} aria-hidden="true" />

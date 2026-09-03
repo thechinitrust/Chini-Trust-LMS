@@ -34,46 +34,53 @@ export function HeroSection() {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden border-b border-black/5 dark:border-white/10">
-      {/* Two-tone brand glow — olive + indigo, the signature duotone mesh */}
+      {/* Background full-width artwork with parallax scroll */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        
+        {/* Restrict the image wrapper to the right side of the screen on desktop to push the brain right and scale it down */}
+        <motion.div style={{ y: imageY }} className="absolute inset-y-0 right-0 w-full lg:w-[65%]">
+          {/* Smooth fade on the left edge using CSS mask */}
+          <div className="absolute inset-0 w-full h-full" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 25%)', maskImage: 'linear-gradient(to right, transparent, black 25%)' }}>
+            {/* Smooth fade on the top and bottom edges using CSS mask */}
+            <div className="absolute inset-0 w-full h-full" style={{ WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)' }}>
+              <Image
+                src="/images/home-hero.jpg"
+                alt="Colorful illustration of diverse human profiles representing neurodiversity"
+                fill
+                priority
+                className="object-cover object-right opacity-85 dark:opacity-75"
+                sizes="100vw"
+              />
+            </div>
+          </div>
+        </motion.div>
+        
+        {/* Horizontal gradient overlay protecting left text column readability (covers full width for mobile) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 via-40% to-transparent lg:hidden" />
+      </div>
+
+      {/* Ambient duotone brand glow */}
       <motion.div
-        animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
+        animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.64, 0.4] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute top-[-12rem] left-1/2 h-[36rem] w-[36rem] -translate-x-[65%] rounded-full bg-primary/12 blur-3xl"
-      />
-      <motion.div
-        animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="pointer-events-none absolute top-[-6rem] right-0 h-[32rem] w-[32rem] translate-x-1/3 rounded-full bg-accent/14 blur-3xl"
-      />
-      <motion.div
-        animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.9, 0.5] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="pointer-events-none absolute bottom-[-10rem] left-[10%] h-[24rem] w-[24rem] rounded-full bg-accent/8 blur-3xl"
+        className="pointer-events-none absolute top-[-12rem] left-1/4 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl z-0"
       />
 
-      {/* Asymmetric vertical padding: the hero sits directly under the navbar, so
-          a full py-24/32 above it reads as dead space rather than breathing room.
-          The bottom keeps its full value to separate the hero from the section
-          below. */}
       <motion.div
         variants={container}
         initial="hidden"
         animate="visible"
-        className="container-page relative grid gap-14 px-6 pt-10 pb-24 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:px-12 lg:pt-14 lg:pb-32"
+        className="container-page relative z-10 grid gap-12 px-6 pt-10 pb-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-12 lg:pt-14 lg:pb-32"
       >
-        <div>
+        <div className="max-w-2xl">
           <motion.span
             variants={item}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-medium tracking-widest text-primary-text uppercase"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-medium tracking-widest text-primary-text uppercase backdrop-blur-md"
           >
             <Brain className="size-3.5" strokeWidth={1.5} aria-hidden="true" />
             The Chini Trust
           </motion.span>
 
-          {/* `text-balance` is deliberately absent: at display sizes it evens the
-              line lengths out into short ragged lines, leaving a visible gap down
-              the right of the column. Letting the lines fill naturally keeps the
-              headline reading as one solid block. */}
           <motion.h1
             variants={item}
             className="mt-7 font-serif text-5xl leading-[1.02] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
@@ -82,11 +89,6 @@ export function HeroSection() {
             <span className="text-accent-text italic">inclusion</span>
           </motion.h1>
 
-          {/* The three promises are a strapline, not a paragraph -- set as a real
-              list, one step above the body copy in weight. Stacked rather than
-              run inline with separators: at these widths an inline row wraps
-              mid-list and strands a separator at the end of a line. One promise
-              per row also lets each be scanned in a single eye movement. */}
           <motion.ul
             variants={item}
             className="mt-8 space-y-2.5 text-lg leading-snug font-medium text-foreground/90 sm:text-xl"
@@ -96,7 +98,7 @@ export function HeroSection() {
                 <li key={promise} className="flex items-center gap-3.5">
                   <span
                     aria-hidden="true"
-                    className="size-1.5 shrink-0 rounded-full bg-primary/50 ring-4 ring-primary/10"
+                    className="size-1.5 shrink-0 rounded-full bg-primary/60 ring-4 ring-primary/15"
                   />
                   {promise}
                 </li>
@@ -106,7 +108,7 @@ export function HeroSection() {
 
           <motion.p
             variants={item}
-            className="mt-5 max-w-lg border-l-2 border-primary/20 pl-5 text-base leading-relaxed text-muted-foreground sm:text-lg"
+            className="mt-5 max-w-lg border-l-2 border-primary/30 pl-5 text-base leading-relaxed text-muted-foreground sm:text-lg"
           >
             Explore courses, practical resources, and accessibility tools designed for anyone
             who wants to learn more and help everyone feel understood.
@@ -128,25 +130,6 @@ export function HeroSection() {
             </MagneticButton>
           </motion.div>
         </div>
-
-        <motion.div variants={item} className="relative mx-auto w-full max-w-xl">
-          {/* Scroll parallax lives on this inner wrapper only, so it never
-              fights the outer motion.div's mount-in animation above. */}
-          <motion.div style={{ y: imageY }} className="relative group">
-            {/* Hero illustration — the source art is 3:2, so the frame matches
-                it exactly and object-contain guarantees nothing is cropped. */}
-            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[24px] border border-primary/15 bg-card shadow-soft-lg">
-              <Image
-                src="/images/home-hero.png"
-                alt="An illustration of a student studying at a desk beneath an umbrella representing the neurodiversity spectrum"
-                fill
-                priority
-                className="object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-                sizes="(min-width: 1024px) 36rem, 100vw"
-              />
-            </div>
-          </motion.div>
-        </motion.div>
       </motion.div>
     </section>
   );

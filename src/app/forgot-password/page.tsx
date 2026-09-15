@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// Recovery links must always return to the public LMS domain. Using
+// window.location.origin here would send links requested from a preview or
+// legacy deployment back to that deployment.
+const RECOVERY_REDIRECT_URL = `${(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://learn.chinitrust.org"
+).replace(/\/$/, "")}/reset-password`;
+
 export default function ForgotPasswordPage() {
   const supabase = React.useMemo(() => createClient(), []);
   const [email, setEmail] = React.useState("");
@@ -21,7 +28,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setIsSubmitting(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: RECOVERY_REDIRECT_URL,
     });
     setIsSubmitting(false);
     if (error) {

@@ -4,12 +4,13 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Moon, Sun, LayoutDashboard, ShieldCheck, LogOut } from "lucide-react";
+import { Menu, Moon, Sun, LayoutDashboard, ShieldCheck, LogOut, Focus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
+import { useAccessibility } from "@/context/accessibility-context";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -38,10 +39,16 @@ export function Navbar() {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { focusMode, setFocusMode } = useAccessibility();
   const [mounted, setMounted] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   React.useEffect(() => setMounted(true), []);
+
+  const isLearningPage =
+    pathname.startsWith("/learn") ||
+    pathname.startsWith("/courses") ||
+    pathname.startsWith("/lessons");
 
   const handleLogout = async () => {
     setMobileOpen(false);
@@ -55,10 +62,7 @@ export function Navbar() {
   };
 
   return (
-    <header
-      className="sticky top-0 z-40 glass print:hidden"
-      data-focus-hide="true"
-    >
+    <header className="sticky top-0 z-40 glass print:hidden">
       <div className="container-page flex h-20 items-center justify-between gap-4 px-6 lg:px-12">
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
           <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-soft transition-transform duration-500 group-hover:scale-105">
@@ -130,6 +134,36 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {isLearningPage && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={mounted && focusMode ? "Exit focus mode" : "Enter focus mode"}
+              title={mounted && focusMode ? "Exit focus mode" : "Focus mode"}
+              onClick={() => setFocusMode(!focusMode)}
+              className={cn(
+                "relative transition-all duration-300",
+                mounted && focusMode && "bg-primary/15 text-primary-text ring-1 ring-primary/25 hover:bg-primary/20 hover:text-primary-text"
+              )}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={mounted && focusMode ? "focus-active" : "focus-inactive"}
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.6 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex"
+                >
+                  <Focus className="size-5" strokeWidth={1.5} />
+                </motion.span>
+              </AnimatePresence>
+              {mounted && focusMode && (
+                <span className="absolute top-2 right-2 size-2 rounded-full bg-primary ring-2 ring-background" />
+              )}
+            </Button>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -213,6 +247,30 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+                {isLearningPage && (
+                  <>
+                    <div className="my-2 h-px bg-border" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFocusMode(!focusMode);
+                        setMobileOpen(false);
+                      }}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                        mounted && focusMode ? "bg-primary/12 text-primary-text" : "text-foreground"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Focus className="size-4" strokeWidth={1.5} />
+                        Focus mode
+                      </span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {mounted && focusMode ? "Active" : "Off"}
+                      </span>
+                    </button>
+                  </>
+                )}
                 <div className="my-2 h-px bg-border" />
                 {user ? (
                   <>

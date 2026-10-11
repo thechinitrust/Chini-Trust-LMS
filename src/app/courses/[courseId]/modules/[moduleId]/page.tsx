@@ -50,7 +50,7 @@ export default async function ModulePage({
   );
 
   return (
-    <div className="container-page px-6 py-16 lg:px-12" data-focus-content="true">
+    <div className="container-page px-6 py-16 lg:px-12">
       <Reveal>
         <nav className="text-sm text-muted-foreground">
           <Link href={`/courses/${course.slug}`} className="hover:text-primary-text">
@@ -67,14 +67,14 @@ export default async function ModulePage({
         </div>
       </Reveal>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]" data-focus-grid="true">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         <Reveal delay={0.1} className="space-y-1">
           {lessons.map((lesson) => (
             <LessonCard key={lesson.id} lesson={lesson} completed={completedLessonIds.has(lesson.id)} />
           ))}
         </Reveal>
 
-        <Reveal delay={0.2} className="space-y-6" data-focus-aside="true">
+        <Reveal delay={0.2} className="space-y-6">
           {quiz && (
             <div className="rounded-2xl border border-black/5 bg-card p-6 shadow-soft dark:border-white/10">
               <div className="flex items-center justify-between gap-2.5">

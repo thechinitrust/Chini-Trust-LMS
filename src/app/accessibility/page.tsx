@@ -129,7 +129,7 @@ export default function AccessibilityPage() {
           <AccessibilityControl
             icon={Focus}
             title="Focus mode"
-            description="Hide the navigation, footer and sidebars, and expand the lesson content into a centered, distraction-free reading column."
+            description="Hide non-essential footer and distraction elements, and expand content into a centered reading column. You can also toggle this at any time using the Focus icon in the navigation bar."
             control={
               <Switch
                 checked={focusMode}
@@ -137,7 +137,7 @@ export default function AccessibilityPage() {
                   setFocusMode(checked);
                   notify.info(
                     checked ? "Focus mode on" : "Focus mode off",
-                    checked ? "Use the Exit button at the top to leave." : undefined
+                    checked ? "You can toggle this off anytime via the Focus icon in the navigation bar." : undefined
                   );
                 }}
                 aria-label="Toggle focus mode"
@@ -211,7 +211,7 @@ export default function AccessibilityPage() {
 
       <Reveal className="mx-auto mt-12 max-w-2xl" variant="scale">
         <Card>
-          <CardContent className="p-7" data-focus-dim="true">
+          <CardContent className="p-7">
             <p className="text-xs font-medium tracking-widest text-primary-text uppercase">Live preview</p>
             <h3 className="mt-3 text-lg font-semibold text-foreground">This is a preview heading</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

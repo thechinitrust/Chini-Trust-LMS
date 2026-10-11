@@ -353,43 +353,47 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Accessibility: Focus mode — a genuine distraction-free reading mode.
-   Chrome marked [data-focus-hide] is removed outright; the element marked
-   [data-focus-content] becomes a centered reading column.
-
-   These rules are deliberately UNLAYERED: unlayered CSS outranks every
-   @layer (including Tailwind's utilities), so a page's own `container-page`
-   / padding utilities can't win over the reading-mode measure.
+   Accessibility: Focus mode — tailored for neurodivergent learners.
+   Strips visual clutter, pauses peripheral motion, and expands the learning
+   experience into a clean, distraction-free environment without disturbing
+   general page layouts.
    --------------------------------------------------------------------------- */
 .focus-mode [data-focus-hide="true"] {
   display: none !important;
 }
 
-/* Legacy hook — anything only *dimmed* rather than hidden */
-.focus-mode [data-focus-dim="true"] {
-  opacity: 0.35;
-  pointer-events: none;
+/* Strip all extra CSS motion, transitions & looping micro-interactions */
+.focus-mode *,
+.focus-mode *::before,
+.focus-mode *::after {
+  animation: none !important;
+  animation-play-state: paused !important;
+  transition: none !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
-.focus-mode [data-focus-content="true"] {
+.focus-mode .animate-pulse,
+.focus-mode .animate-spin,
+.focus-mode .animate-bounce,
+.focus-mode .animate-ping {
+  animation: none !important;
+}
+
+/* Learning Focus Layout: Inside lesson pages, hide bulky sidebars and optimize reading width */
+.focus-mode [data-focus-lesson="true"] [data-focus-aside="true"] {
+  display: none !important;
+}
+
+.focus-mode [data-focus-lesson="true"] [data-focus-grid="true"] {
+  display: block !important;
+  max-width: 62rem;
   margin-inline: auto;
-  max-width: 46rem;
-  padding-inline: 1.5rem;
-  padding-block: 4.5rem 3rem;
 }
 
-/* Collapse multi-column learning layouts into a single reading column */
-.focus-mode [data-focus-content="true"] [data-focus-grid="true"] {
-  display: block;
-}
-
-.focus-mode [data-focus-content="true"] [data-focus-aside="true"] {
-  display: none;
-}
-
-/* Roomier rhythm while reading */
-.focus-mode [data-focus-content="true"] p,
-.focus-mode [data-focus-content="true"] li {
+/* Roomier typography and calm line spacing for neurodivergent reading comprehension */
+.focus-mode [data-focus-lesson="true"] p,
+.focus-mode [data-focus-lesson="true"] li {
   line-height: 1.8;
 }
 

@@ -6,7 +6,6 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ReadAloudControl } from "@/components/accessibility/read-aloud-control";
-import { FocusModeBar } from "@/components/accessibility/focus-mode-bar";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -83,7 +82,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             Skip to content
           </a>
-          <FocusModeBar />
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main id="main-content" className="flex-1">

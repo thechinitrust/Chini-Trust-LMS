@@ -5,23 +5,32 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 
 import { AuthProvider } from "@/context/auth-context";
-import { AccessibilityProvider } from "@/context/accessibility-context";
+import { AccessibilityProvider, useAccessibility } from "@/context/accessibility-context";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
+function DynamicMotionConfig({ children }: { children: React.ReactNode }) {
+  const { focusMode } = useAccessibility();
+  return (
+    <MotionConfig reducedMotion={focusMode ? "always" : "user"}>
+      {children}
+    </MotionConfig>
+  );
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <MotionConfig reducedMotion="user">
-        <TooltipProvider delayDuration={200}>
-          <AuthProvider>
-            <AccessibilityProvider>
+      <TooltipProvider delayDuration={200}>
+        <AuthProvider>
+          <AccessibilityProvider>
+            <DynamicMotionConfig>
               {children}
               <Toaster position="bottom-right" />
-            </AccessibilityProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </MotionConfig>
+            </DynamicMotionConfig>
+          </AccessibilityProvider>
+        </AuthProvider>
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

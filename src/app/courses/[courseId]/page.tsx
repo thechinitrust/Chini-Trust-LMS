@@ -80,7 +80,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
   const unpassedRequiredQuizzes = requiredQuizStatus.filter((s) => !s.passed);
 
   return (
-    <div className="container-page px-6 py-12 lg:px-12 lg:py-16" data-focus-content="true">
+    <div className="container-page px-6 py-12 lg:px-12 lg:py-16">
       {/* ---- Course header ---- */}
       <Reveal>
         <nav className="mb-5 text-sm text-muted-foreground" aria-label="Breadcrumb">
@@ -128,10 +128,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
       </Reveal>
 
       {/* ---- Intro video + enrolment rail ---- */}
-      <div
-        className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[1.7fr_minmax(0,1fr)]"
-        data-focus-grid="true"
-      >
+      <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[1.7fr_minmax(0,1fr)]">
         <Reveal className="min-w-0">
           {introVideoId ? (
             <figure>
@@ -262,7 +259,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
         </Reveal>
 
         {/* ---- Sticky enrolment card ---- */}
-        <Reveal delay={0.15} className="min-w-0" data-focus-aside="true">
+        <Reveal delay={0.15} className="min-w-0">
           <Card tone="brand" elevation="lifted" className="sticky top-28">
             <CardContent className="space-y-5 p-6">
               <CourseEnrollPanel

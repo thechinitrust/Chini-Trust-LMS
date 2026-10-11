@@ -53,7 +53,7 @@ export default async function AboutPage() {
   const speakers = await listSpeakers(supabase).catch(() => []);
 
   return (
-    <div className="container-page px-6 py-20 lg:px-12" data-focus-content="true">
+    <div className="container-page px-6 py-20 lg:px-12">
       <Reveal className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-medium tracking-widest text-primary-text uppercase">About us</p>
         <h1 className="mt-4 font-serif text-4xl tracking-tight text-foreground sm:text-5xl">

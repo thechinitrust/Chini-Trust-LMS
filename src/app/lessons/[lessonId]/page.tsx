@@ -67,7 +67,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
   const isLastInModule = (lessonsByModule[courseModule.id] ?? []).at(-1)?.id === lesson.id;
 
   return (
-    <div className="container-page px-6 py-10 lg:px-12 lg:py-14" data-focus-content="true">
+    <div className="container-page px-6 py-10 lg:px-12 lg:py-14" data-focus-lesson="true">
       <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground" aria-label="Breadcrumb">
         <Link href={`/courses/${course.slug}`} className="transition-colors hover:text-primary-text">
           {course.title}
@@ -79,6 +79,8 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
         >
           {courseModule.title}
         </Link>
+        <span aria-hidden="true">/</span>
+        <span className="max-w-xs truncate font-medium text-foreground">{lesson.title}</span>
       </nav>
 
       <div

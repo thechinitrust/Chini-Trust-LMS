@@ -8,7 +8,7 @@ import { getProfileById } from "@/lib/data/users";
 import { listCourses } from "@/lib/data/courses";
 import { getEnrollmentsForUser } from "@/lib/data/enrollments";
 import { getCertificatesForUser } from "@/lib/data/certificates";
-import { getCourseCompletionPercent, getProgressForUser } from "@/lib/data/progress";
+import { getCourseCompletionPercentagesForUser, getProgressForUser } from "@/lib/data/progress";
 import { getLessonById } from "@/lib/data/lessons";
 import { getModuleById } from "@/lib/data/modules";
 import { getUpcomingEvents } from "@/lib/data/events";
@@ -44,12 +44,14 @@ export default async function DashboardPage() {
   const inProgress = enrollments.filter((e) => e.status !== "completed");
   const completed = enrollments.filter((e) => e.status === "completed");
 
-  const progressPercentByCourse: Record<string, number> = {};
-  await Promise.all(
-    enrollments.map(async (e) => {
-      progressPercentByCourse[e.courseId] = await getCourseCompletionPercent(supabase, authUserId, e.courseId);
-    })
-  );
+  const inProgressIds = inProgress.map((e) => e.courseId);
+  const progressPercentByCourse: Record<string, number> =
+    inProgressIds.length > 0
+      ? await getCourseCompletionPercentagesForUser(supabase, authUserId, inProgressIds).catch(() => ({}))
+      : {};
+  for (const e of completed) {
+    progressPercentByCourse[e.courseId] = 100;
+  }
   const avgProgress =
     enrollments.length === 0
       ? 0

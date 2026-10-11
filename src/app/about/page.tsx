@@ -50,7 +50,7 @@ const SECTIONS = [
 
 export default async function AboutPage() {
   const supabase = await createClient();
-  const speakers = await listSpeakers(supabase);
+  const speakers = await listSpeakers(supabase).catch(() => []);
 
   return (
     <div className="container-page px-6 py-20 lg:px-12" data-focus-content="true">

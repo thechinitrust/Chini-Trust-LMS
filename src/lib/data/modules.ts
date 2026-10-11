@@ -96,3 +96,17 @@ export async function reorderModules(
   const failed = results.find((r) => r.error);
   if (failed?.error) throw failed.error;
 }
+
+/**
+ * Returns a map of courseId -> moduleCount in a single database query.
+ * Eliminates N+1 queries when rendering course lists.
+ */
+export async function getModuleCountsByCourse(client: SupabaseClient): Promise<Record<string, number>> {
+  const { data, error } = await client.from("modules").select("course_id");
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  for (const row of (data ?? []) as { course_id: string }[]) {
+    counts[row.course_id] = (counts[row.course_id] || 0) + 1;
+  }
+  return counts;
+}

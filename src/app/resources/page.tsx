@@ -4,6 +4,6 @@ import { ResourcesClient } from "./resources-client";
 
 export default async function ResourcesPage() {
   const supabase = await createClient();
-  const resources = await listResources(supabase);
+  const resources = await listResources(supabase).catch(() => []);
   return <ResourcesClient resources={resources} />;
 }

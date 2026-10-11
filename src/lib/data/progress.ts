@@ -72,6 +72,52 @@ export async function getCourseCompletionPercent(
 }
 
 /**
+  * Calculates course completion percentages for multiple courses in a single batch.
+  * Eliminates running 3-5 roundtrip database queries per course.
+  */
+export async function getCourseCompletionPercentagesForUser(
+  client: SupabaseClient,
+  userId: string,
+  courseIds: string[]
+): Promise<Record<string, number>> {
+  if (courseIds.length === 0) return {};
+
+  const [lessonsRes, progressRes, quizzesRes, attemptsRes] = await Promise.all([
+    client.from("lessons").select("id, course_id, published").in("course_id", courseIds),
+    client.from("progress").select("lesson_id, completed").eq("user_id", userId).eq("completed", true),
+    client.from("quizzes").select("id, course_id, is_required").in("course_id", courseIds).eq("is_required", true),
+    client.from("quiz_attempts").select("quiz_id").eq("user_id", userId).eq("passed", true),
+  ]);
+
+  if (lessonsRes.error) throw lessonsRes.error;
+  if (progressRes.error) throw progressRes.error;
+  if (quizzesRes.error) throw quizzesRes.error;
+  if (attemptsRes.error) throw attemptsRes.error;
+
+  const completedLessonIds = new Set((progressRes.data ?? []).map((p) => p.lesson_id));
+  const passedQuizIds = new Set((attemptsRes.data ?? []).map((a) => a.quiz_id));
+
+  const result: Record<string, number> = {};
+
+  for (const courseId of courseIds) {
+    const courseLessons = (lessonsRes.data ?? []).filter((l) => l.course_id === courseId && l.published);
+    const courseQuizzes = (quizzesRes.data ?? []).filter((q) => q.course_id === courseId);
+    const total = courseLessons.length + courseQuizzes.length;
+    if (total === 0) {
+      result[courseId] = 0;
+      continue;
+    }
+
+    const completedLessons = courseLessons.filter((l) => completedLessonIds.has(l.id)).length;
+    const passedQuizzes = courseQuizzes.filter((q) => passedQuizIds.has(q.id)).length;
+
+    result[courseId] = Math.round(((completedLessons + passedQuizzes) / total) * 100);
+  }
+
+  return result;
+}
+
+/**
  * Consecutive calendar days (UTC) with at least one progress write, counting
  * backward from today until the first gap. No schema beyond `progress`
  * needed -- just distinct `last_watched_at` dates.

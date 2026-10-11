@@ -165,3 +165,24 @@ export async function reorderLessons(
   const failed = results.find((r) => r.error);
   if (failed?.error) throw failed.error;
 }
+
+/**
+ * Returns a map of courseId -> lessonCount in a single database query.
+ * Eliminates N+1 queries when rendering course catalogues.
+ */
+export async function getLessonCountsByCourse(
+  client: SupabaseClient,
+  publishedOnly = false
+): Promise<Record<string, number>> {
+  let query = client.from("lessons").select("course_id, published");
+  if (publishedOnly) {
+    query = query.eq("published", true);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  for (const row of (data ?? []) as { course_id: string }[]) {
+    counts[row.course_id] = (counts[row.course_id] || 0) + 1;
+  }
+  return counts;
+}

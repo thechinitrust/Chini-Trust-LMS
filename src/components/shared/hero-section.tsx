@@ -21,7 +21,15 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE_OUT } },
 };
 
-export function HeroSection() {
+interface HeroSectionProps {
+  imageUrl?: string;
+  imageAlt?: string;
+}
+
+export function HeroSection({
+  imageUrl = "/images/home-hero.jpg",
+  imageAlt = "Colorful illustration of diverse human profiles representing neurodiversity",
+}: HeroSectionProps = {}) {
   const sectionRef = React.useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
@@ -44,8 +52,8 @@ export function HeroSection() {
             {/* Smooth fade on the top and bottom edges using CSS mask */}
             <div className="absolute inset-0 w-full h-full" style={{ WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)' }}>
               <Image
-                src="/images/home-hero.jpg"
-                alt="Colorful illustration of diverse human profiles representing neurodiversity"
+                src={imageUrl}
+                alt={imageAlt}
                 fill
                 priority
                 className="object-cover object-right opacity-85 dark:opacity-75"

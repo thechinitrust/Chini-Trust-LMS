@@ -12,6 +12,7 @@ import {
   Award,
   CalendarDays,
   Mic2,
+  Settings,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const ADMIN_LINKS = [
   { href: "/admin/events", label: "Events", icon: CalendarDays },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/certificates", label: "Certificates", icon: Award },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminSidebar() {

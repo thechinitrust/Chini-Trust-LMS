@@ -30,6 +30,7 @@ const QUICK_LINKS = [
   { href: "/admin/events", label: "Manage events" },
   { href: "/admin/users", label: "Manage users" },
   { href: "/admin/certificates", label: "Manage certificates" },
+  { href: "/admin/settings", label: "Site settings" },
 ];
 
 export default async function AdminOverviewPage() {

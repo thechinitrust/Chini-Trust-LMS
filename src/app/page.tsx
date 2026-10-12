@@ -15,6 +15,7 @@ import { TiltCard } from "@/components/motion/tilt-card";
 import { createClient } from "@/lib/supabase/server";
 import { listCourses } from "@/lib/data/courses";
 import { listResources } from "@/lib/data/resources";
+import { getSiteSettings } from "@/lib/data/site-settings";
 
 const FEATURES = [
   {
@@ -67,16 +68,20 @@ import { MagneticButton } from "@/components/motion/magnetic-button";
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const [courses, resources] = await Promise.all([
+  const [courses, resources, siteSettings] = await Promise.all([
     listCourses(supabase).catch(() => []),
     listResources(supabase).catch(() => []),
+    getSiteSettings(supabase),
   ]);
   const featuredCourses = courses.filter((c) => c.published && c.featured).slice(0, 3);
   const featuredResources = resources.filter((r) => r.published && r.featured).slice(0, 3);
 
   return (
     <>
-      <HeroSection />
+      <HeroSection
+        imageUrl={siteSettings.heroImageUrl}
+        imageAlt={siteSettings.heroImageAlt}
+      />
       <StatsSection />
 
       <section className="container-page px-6 py-24 lg:px-12 lg:py-32">

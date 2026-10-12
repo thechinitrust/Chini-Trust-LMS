@@ -69,9 +69,14 @@ export function CourseEnrollPanel({
       )}
 
       {!userId ? (
-        <Button className="w-full" size="lg" asChild>
-          <Link href="/login">Log in to enroll</Link>
-        </Button>
+        <div className="space-y-2">
+          <Button className="w-full" size="lg" asChild>
+            <Link href="/login">Log in to track progress</Link>
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Account optional &middot; Click any lesson below to watch as a guest.
+          </p>
+        </div>
       ) : isEnrolled ? (
         <Button className="w-full" size="lg" asChild>
           <Link href={firstLessonHref ?? "#"}>{percent > 0 ? "Continue learning" : "Start course"}</Link>

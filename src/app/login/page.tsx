@@ -83,12 +83,22 @@ function LoginForm() {
       title="Welcome back"
       description="Log in to continue your learning journey."
       footer={
-        <>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold text-primary-text hover:underline">
-            Sign up
-          </Link>
-        </>
+        <div className="space-y-1.5 text-center text-sm text-muted-foreground">
+          <div>
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-semibold text-primary-text hover:underline">
+              Sign up
+            </Link>
+          </div>
+          <div>
+            <Link
+              href={safeRedirectTarget(searchParams.get("redirectTo")) ?? "/learn"}
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline"
+            >
+              Or explore courses as a guest &rarr;
+            </Link>
+          </div>
+        </div>
       }
     >
       <form className="space-y-4" onSubmit={handleSubmit}>

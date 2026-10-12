@@ -6,7 +6,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import type { Course, Resource, ResourceType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { createResource, deleteResource, updateResource, type ResourceInput } from "@/lib/data/resources";
+import { createResource, deleteResource, setResourcePublished, updateResource, type ResourceInput } from "@/lib/data/resources";
 import { audienceLabel } from "@/lib/audiences";
 import { notify } from "@/lib/toast";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -30,7 +30,7 @@ const TYPE_LABEL: Record<ResourceType, string> = {
   link: "Link",
 };
 function emptyDraft(): ResourceInput {
-  return { title: "", summary: "", type: "guide", audiences: [], fileUrl: "", featured: false };
+  return { title: "", summary: "", type: "guide", audiences: [], fileUrl: "", featured: false, published: true };
 }
 
 export function ResourcesTable({ resources, courses }: { resources: Resource[]; courses: Course[] }) {
@@ -68,8 +68,21 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
       moduleId: resource.moduleId,
       lessonId: resource.lessonId,
       featured: resource.featured ?? false,
+      published: resource.published ?? true,
     });
     setDialogOpen(true);
+  };
+
+  const togglePublished = async (resource: Resource) => {
+    const next = !resource.published;
+    try {
+      const supabase = createClient();
+      await setResourcePublished(supabase, resource.id, next);
+      notify.success(next ? "Resource published" : "Resource moved to drafts");
+      router.refresh();
+    } catch (error) {
+      notify.error("Couldn't update status", error instanceof Error ? error.message : undefined);
+    }
   };
 
   const handleSave = async () => {
@@ -144,6 +157,24 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
         ),
     },
     { header: "Course", cell: (r) => courseTitle(r.courseId) },
+    {
+      header: "Status",
+      cell: (r) => (
+        <button
+          type="button"
+          onClick={() => togglePublished(r)}
+          aria-label={`Toggle published status for ${r.title}`}
+          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Badge
+            variant={r.published ? "success" : "outline"}
+            className="cursor-pointer transition-colors"
+          >
+            {r.published ? "Published" : "Draft"}
+          </Badge>
+        </button>
+      ),
+    },
     {
       header: "Actions",
       cell: (r) => (
@@ -250,6 +281,16 @@ export function ResourcesTable({ resources, courses }: { resources: Resource[]; 
               placeholder="/resources/example.pdf"
             />
           </FormField>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <span className="text-sm font-medium text-foreground">Published</span>
+              <p className="text-xs text-muted-foreground">Only published resources are visible to learners.</p>
+            </div>
+            <Switch
+              checked={draft.published ?? true}
+              onCheckedChange={(checked) => setDraft({ ...draft, published: checked })}
+            />
+          </div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
               <span className="text-sm font-medium text-foreground">Feature on homepage</span>

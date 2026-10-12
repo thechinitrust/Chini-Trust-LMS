@@ -72,64 +72,68 @@ export function Navbar() {
         </Link>
 
         <nav className="relative hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-          {NAV_LINKS.map((link) => {
-            const active = pathname === link.href || pathname.startsWith(link.href + "/");
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
-                  active && "text-primary-text"
-                )}
-                aria-current={active ? "page" : undefined}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="navbar-active-pill"
-                    className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10">{link.label}</span>
-              </Link>
-            );
-          })}
-          {user && (
-            <Link
-              href="/dashboard"
-              className={cn(
-                "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
-                (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && "text-primary-text"
+          {mounted && focusMode && isLearningPage ? null : (
+            <>
+              {NAV_LINKS.map((link) => {
+                const active = pathname === link.href || pathname.startsWith(link.href + "/");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                      active && "text-primary-text"
+                    )}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="navbar-active-pill"
+                        className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10">{link.label}</span>
+                  </Link>
+                );
+              })}
+              {user && (
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                    (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && "text-primary-text"
+                  )}
+                >
+                  {(pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && (
+                    <motion.span
+                      layoutId="navbar-active-pill"
+                      className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5"><LayoutDashboard className="size-4" strokeWidth={1.5} /> Dashboard</span>
+                </Link>
               )}
-            >
-              {(pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && (
-                <motion.span
-                  layoutId="navbar-active-pill"
-                  className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
-                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                />
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
+                    (pathname === "/admin" || pathname.startsWith("/admin/")) && "text-primary-text"
+                  )}
+                >
+                  {(pathname === "/admin" || pathname.startsWith("/admin/")) && (
+                    <motion.span
+                      layoutId="navbar-active-pill"
+                      className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5"><ShieldCheck className="size-4" strokeWidth={1.5} /> Admin</span>
+                </Link>
               )}
-              <span className="relative z-10 flex items-center gap-1.5"><LayoutDashboard className="size-4" strokeWidth={1.5} /> Dashboard</span>
-            </Link>
-          )}
-          {user?.role === "admin" && (
-            <Link
-              href="/admin"
-              className={cn(
-                "relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary-text",
-                (pathname === "/admin" || pathname.startsWith("/admin/")) && "text-primary-text"
-              )}
-            >
-              {(pathname === "/admin" || pathname.startsWith("/admin/")) && (
-                <motion.span
-                  layoutId="navbar-active-pill"
-                  className="absolute inset-0 rounded-full bg-primary/12 ring-1 ring-primary/20"
-                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-1.5"><ShieldCheck className="size-4" strokeWidth={1.5} /> Admin</span>
-            </Link>
+            </>
           )}
         </nav>
 
@@ -230,95 +234,121 @@ export function Navbar() {
                 <SheetTitle className="font-serif">Menu</SheetTitle>
               </SheetHeader>
               <nav className="mt-4 flex flex-col gap-1" aria-label="Mobile navigation">
-                {NAV_LINKS.map((link) => {
-                  const active = pathname === link.href || pathname.startsWith(link.href + "/");
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                        active ? "bg-primary/12 text-primary-text" : "text-foreground"
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-                {isLearningPage && (
-                  <>
-                    <div className="my-2 h-px bg-border" />
-                    <button
-                      type="button"
+                {mounted && focusMode && isLearningPage ? (
+                  <div className="space-y-3 py-2">
+                    <div className="rounded-xl border border-primary/20 bg-primary/10 p-3.5 text-center">
+                      <p className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary-text">
+                        <Focus className="size-4" strokeWidth={2} />
+                        Focus Mode Active
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Navigation links are hidden to keep your study session distraction-free.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center gap-2 border-primary/30 text-primary-text hover:bg-primary/15"
                       onClick={() => {
-                        setFocusMode(!focusMode);
+                        setFocusMode(false);
                         setMobileOpen(false);
                       }}
-                      className={cn(
-                        "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                        mounted && focusMode ? "bg-primary/12 text-primary-text" : "text-foreground"
-                      )}
                     >
-                      <span className="flex items-center gap-2">
-                        <Focus className="size-4" strokeWidth={1.5} />
-                        Focus mode
-                      </span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {mounted && focusMode ? "Active" : "Off"}
-                      </span>
-                    </button>
-                  </>
-                )}
-                <div className="my-2 h-px bg-border" />
-                {user ? (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setMobileOpen(false)}
-                      className={cn(
-                        "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                        pathname === "/dashboard" || pathname.startsWith("/dashboard/") ? "bg-primary/12 text-primary-text" : "text-foreground"
-                      )}
-                    >
-                      Dashboard
-                    </Link>
-                    {user.role === "admin" && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setMobileOpen(false)}
-                        className={cn(
-                          "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
-                          pathname === "/admin" || pathname.startsWith("/admin/") ? "bg-primary/12 text-primary-text" : "text-foreground"
-                        )}
-                      >
-                        Admin panel
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
-                    >
-                      Log out
-                    </button>
-                  </>
+                      Exit Focus Mode
+                    </Button>
+                  </div>
                 ) : (
                   <>
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                    >
-                      Log in
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-full bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
-                    >
-                      Sign up
-                    </Link>
+                    {NAV_LINKS.map((link) => {
+                      const active = pathname === link.href || pathname.startsWith(link.href + "/");
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                            active ? "bg-primary/12 text-primary-text" : "text-foreground"
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                    {isLearningPage && (
+                      <>
+                        <div className="my-2 h-px bg-border" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFocusMode(!focusMode);
+                            setMobileOpen(false);
+                          }}
+                          className={cn(
+                            "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                            mounted && focusMode ? "bg-primary/12 text-primary-text" : "text-foreground"
+                          )}
+                        >
+                          <span className="flex items-center gap-2">
+                            <Focus className="size-4" strokeWidth={1.5} />
+                            Focus mode
+                          </span>
+                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {mounted && focusMode ? "Active" : "Off"}
+                          </span>
+                        </button>
+                      </>
+                    )}
+                    <div className="my-2 h-px bg-border" />
+                    {user ? (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className={cn(
+                            "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                            pathname === "/dashboard" || pathname.startsWith("/dashboard/") ? "bg-primary/12 text-primary-text" : "text-foreground"
+                          )}
+                        >
+                          Dashboard
+                        </Link>
+                        {user.role === "admin" && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                              "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted",
+                              pathname === "/admin" || pathname.startsWith("/admin/") ? "bg-primary/12 text-primary-text" : "text-foreground"
+                            )}
+                          >
+                            Admin panel
+                          </Link>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="rounded-xl px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
+                        >
+                          Log out
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileOpen(false)}
+                          className="rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                        >
+                          Log in
+                        </Link>
+                        <Link
+                          href="/register"
+                          onClick={() => setMobileOpen(false)}
+                          className="rounded-full bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
+                        >
+                          Sign up
+                        </Link>
+                      </>
+                    )}
                   </>
                 )}
               </nav>

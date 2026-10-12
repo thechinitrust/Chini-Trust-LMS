@@ -170,6 +170,7 @@ async function seedResources(courseIdMap: Map<string, string>) {
     file_url: r.fileUrl,
     course_id: r.courseId ? must(courseIdMap.get(r.courseId), `course for resource ${r.id}`) : null,
     featured: r.featured ?? false,
+    published: r.published ?? true,
   }));
   await insert("resources", rows);
 }

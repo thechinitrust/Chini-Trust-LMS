@@ -5,5 +5,6 @@ import { ResourcesClient } from "./resources-client";
 export default async function ResourcesPage() {
   const supabase = await createClient();
   const resources = await listResources(supabase).catch(() => []);
-  return <ResourcesClient resources={resources} />;
+  const publishedResources = resources.filter((r) => r.published);
+  return <ResourcesClient resources={publishedResources} />;
 }

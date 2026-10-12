@@ -13,6 +13,7 @@ interface ResourceRow {
   module_id: string | null;
   lesson_id: string | null;
   featured: boolean;
+  published?: boolean;
   created_at: string;
 }
 
@@ -28,12 +29,13 @@ function mapResource(row: ResourceRow): Resource {
     moduleId: row.module_id ?? undefined,
     lessonId: row.lesson_id ?? undefined,
     featured: row.featured,
+    published: row.published ?? true,
     createdAt: row.created_at,
   };
 }
 
 const RESOURCE_COLUMNS =
-  "id, title, summary, type, audiences, file_url, course_id, module_id, lesson_id, featured, created_at";
+  "id, title, summary, type, audiences, file_url, course_id, module_id, lesson_id, featured, published, created_at";
 
 export async function listResources(client: SupabaseClient): Promise<Resource[]> {
   const { data, error } = await client
@@ -87,6 +89,7 @@ export interface ResourceInput {
   moduleId?: string;
   lessonId?: string;
   featured: boolean;
+  published?: boolean;
 }
 
 function toResourceRow(input: ResourceInput) {
@@ -100,6 +103,7 @@ function toResourceRow(input: ResourceInput) {
     module_id: input.moduleId ?? null,
     lesson_id: input.lessonId ?? null,
     featured: input.featured,
+    published: input.published ?? true,
   };
 }
 
@@ -126,6 +130,15 @@ export async function updateResource(
     .single();
   if (error) throw error;
   return mapResource(data as ResourceRow);
+}
+
+export async function setResourcePublished(
+  client: SupabaseClient,
+  id: string,
+  published: boolean
+): Promise<void> {
+  const { error } = await client.from("resources").update({ published }).eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteResource(client: SupabaseClient, id: string): Promise<void> {

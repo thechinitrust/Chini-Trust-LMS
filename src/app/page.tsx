@@ -72,7 +72,7 @@ export default async function HomePage() {
     listResources(supabase).catch(() => []),
   ]);
   const featuredCourses = courses.filter((c) => c.published && c.featured).slice(0, 3);
-  const featuredResources = resources.filter((r) => r.featured).slice(0, 3);
+  const featuredResources = resources.filter((r) => r.published && r.featured).slice(0, 3);
 
   return (
     <>

@@ -403,6 +403,7 @@ export const mockResources: Resource[] = [
     fileUrl: "/resources/adhd-classroom-strategies.pdf",
     courseId: "course-adhd",
     featured: true,
+    published: true,
     createdAt: "2026-01-20T09:00:00.000Z",
   },
   {
@@ -414,6 +415,7 @@ export const mockResources: Resource[] = [
     fileUrl: "/resources/understanding-autism.pdf",
     courseId: "course-autism",
     featured: true,
+    published: true,
     createdAt: "2026-01-12T09:00:00.000Z",
   },
   {
@@ -425,6 +427,7 @@ export const mockResources: Resource[] = [
     fileUrl: "/resources/parent-toolkit.pdf",
     courseId: "course-dyslexia",
     featured: true,
+    published: true,
     createdAt: "2026-02-05T09:00:00.000Z",
   },
   {
@@ -436,6 +439,7 @@ export const mockResources: Resource[] = [
     fileUrl: "/resources/inclusive-workplace-guide.pdf",
     courseId: "course-workplace",
     featured: true,
+    published: true,
     createdAt: "2026-02-22T09:00:00.000Z",
   },
   {
@@ -445,6 +449,7 @@ export const mockResources: Resource[] = [
     type: "worksheet",
     audiences: ["students", "neurodivergent-individuals"],
     fileUrl: "/resources/self-advocacy-starter-kit.pdf",
+    published: true,
     createdAt: "2026-03-01T09:00:00.000Z",
   },
   {
@@ -455,6 +460,7 @@ export const mockResources: Resource[] = [
     audiences: ["teachers"],
     fileUrl: "/resources/sensory-room-checklist.pdf",
     courseId: "course-autism",
+    published: true,
     createdAt: "2026-01-25T09:00:00.000Z",
   },
   {
@@ -465,6 +471,7 @@ export const mockResources: Resource[] = [
     audiences: ["teachers"],
     fileUrl: "/resources/executive-function-explained.pdf",
     courseId: "course-adhd",
+    published: true,
     createdAt: "2026-01-28T09:00:00.000Z",
   },
   {
@@ -475,6 +482,7 @@ export const mockResources: Resource[] = [
     audiences: ["employers", "neurodivergent-individuals"],
     fileUrl: "/resources/accommodation-request-template.pdf",
     courseId: "course-workplace",
+    published: true,
     createdAt: "2026-03-05T09:00:00.000Z",
   },
 ];

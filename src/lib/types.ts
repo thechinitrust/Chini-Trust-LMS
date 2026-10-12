@@ -109,6 +109,7 @@ export interface Resource {
   moduleId?: string;
   lessonId?: string;
   featured?: boolean;
+  published: boolean;
   createdAt: string;
 }
 

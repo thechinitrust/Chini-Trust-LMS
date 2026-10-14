@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
 import { notify } from "@/lib/toast";
@@ -35,6 +35,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   // Sign-in already redirects immediately with the profile it just fetched
   // (see handleSubmit) -- without this guard, the effect below would fire a
@@ -61,7 +62,8 @@ function LoginForm() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const profile = await login(email, password);
+      const cleanEmail = email.trim().toLowerCase();
+      const profile = await login(cleanEmail, password);
       notify.success(`Welcome back, ${profile.fullName.split(" ")[0]}`);
       hasRedirectedRef.current = true;
       const redirectTo = safeRedirectTarget(searchParams.get("redirectTo"));
@@ -121,16 +123,27 @@ function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-4" strokeWidth={1.5} /> : <Eye className="size-4" strokeWidth={1.5} />}
+            </button>
+          </div>
         </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="size-4 animate-spin" />}
